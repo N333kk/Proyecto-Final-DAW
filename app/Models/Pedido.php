@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 class Pedido extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['direccion_envio'];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -16,6 +19,6 @@ class Pedido extends Model
 
     public function articulos()
     {
-        return $this->belongsToMany(Articulo::class);
+        return $this->belongsToMany(Articulo::class, 'articulo_pedido', 'pedido_id');
     }
 }

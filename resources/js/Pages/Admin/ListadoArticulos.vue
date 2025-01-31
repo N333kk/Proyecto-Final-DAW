@@ -1,4 +1,5 @@
 <script setup>
+import { Link } from '@inertiajs/vue3'
 
 defineProps({
     articulos: Object,
@@ -22,6 +23,9 @@ let baseImage = "https://picsum.photos/id/";
             <p class="text-blue-700 font-bold">{{ articulo.categoria }}</p>
             <p class="text-blue-700">{{ articulo.descripcion }}</p>
             <p class="text-blue-700 font-semibold">{{ articulo.precio }} €</p>
+
+            <Link :href="`/articulos/${articulo.id}/edit`" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 inline-block">Editar</Link>
+            <Link :href="`/articulos/${articulo.id}`" method="DELETE" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-2 inline-block">Eliminar</Link>
             </div>
         </li>
     </ul>

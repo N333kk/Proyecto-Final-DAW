@@ -59,7 +59,9 @@ class ArticuloViewController extends Controller
      */
     public function edit(Articulo $articulo)
     {
-        //
+        return Inertia::render('Admin/EditarArticulo', [
+            'articulo' => $articulo
+        ]);
     }
 
     /**
@@ -67,7 +69,18 @@ class ArticuloViewController extends Controller
      */
     public function update(Request $request, Articulo $articulo)
     {
-        //
+        $articulo->update([
+            ...$request->all(),
+            ...$request->validate([
+                'nombre' => ['required', 'string'],
+                'imagen' => ['required', 'string'],
+                'categoria' => ['required', 'string'],
+                'descripcion' => ['required', 'string'],
+                'precio' => ['required', 'min:0', 'max:9999.99', 'numeric']
+            ])
+        ]);
+
+        return redirect()->route('articulos.index');
     }
 
     /**
@@ -75,6 +88,7 @@ class ArticuloViewController extends Controller
      */
     public function destroy(Articulo $articulo)
     {
-        //
+        $articulo->delete();
+        return redirect()->back()->with('success', 'Articulo eliminado correctamente');
     }
 }
