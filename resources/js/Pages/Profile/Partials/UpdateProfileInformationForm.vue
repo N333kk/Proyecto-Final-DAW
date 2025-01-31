@@ -17,6 +17,9 @@ const form = useForm({
     _method: 'PUT',
     name: props.user.name,
     email: props.user.email,
+    telefono: props.user.telefono,
+    direccion_envio: props.user.direccion_envio,
+    direccion_facturacion: props.user.direccion_facturacion,
     photo: null,
 });
 
@@ -174,6 +177,45 @@ const clearPhotoFileInput = () => {
                         A new verification link has been sent to your email address.
                     </div>
                 </div>
+            </div>
+
+            <div class="col-span-6 sm:col-span-4">
+                <InputLabel for="telefono" value="Telefono" />
+                <TextInput
+                    id="telefono"
+                    v-model="form.telefono"
+                    type="text"
+                    class="mt-1 block w-full"
+                    required
+                    autocomplete="telefono"
+                />
+                <InputError :message="form.errors.telefono" class="mt-2" />
+            </div>
+
+            <div class="col-span-6 sm:col-span-4">
+                <InputLabel for="direccion_envio" value="Direccion Envio" />
+                <TextInput
+                    id="direccion_envio"
+                    v-model="form.direccion_envio"
+                    type="text"
+                    class="mt-1 block w-full"
+                    required
+                    autocomplete="direccion_envio"
+                />
+                <InputError :message="form.errors.direccion_envio" class="mt-2" />
+            </div>
+
+            <div class="col-span-6 sm:col-span-4">
+                <InputLabel for="direccion_facturacion" value="Direccion Facturacion" />
+                <TextInput
+                    id="direccion_facturacion"
+                    v-model="form.direccion_facturacion"
+                    type="text"
+                    class="mt-1 block w-full"
+                    required
+                    autocomplete="direccion_facturacion"
+                />
+                <InputError :message="form.errors.direccion_facturacion" class="mt-2" />
             </div>
         </template>
 

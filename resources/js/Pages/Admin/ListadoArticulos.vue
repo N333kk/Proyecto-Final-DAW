@@ -4,7 +4,6 @@ import { Link } from '@inertiajs/vue3'
 defineProps({
     articulos: Object,
 });
-let baseImage = "https://picsum.photos/id/";
 
 </script>
 
@@ -16,7 +15,7 @@ let baseImage = "https://picsum.photos/id/";
 
         <li class="bg-white p-6 rounded-lg shadow-md flex text-black" v-for="articulo in articulos" :key="articulo.id">
             <div class="flex-shrink-0 p-1">
-                <img class="w-24 h-36 object-cover rounded" :src="`${baseImage}${articulo.id}/500/550`" alt="">
+                <img class="w-24 h-36 object-cover rounded" :src="`${articulo.imagen}`" alt="Imagen Articulo">
             </div>
             <div class="ml-4">
             <h2 class="text-lg font-semibold mb-2">{{ articulo.nombre }}</h2>
@@ -24,8 +23,8 @@ let baseImage = "https://picsum.photos/id/";
             <p class="text-blue-700">{{ articulo.descripcion }}</p>
             <p class="text-blue-700 font-semibold">{{ articulo.precio }} €</p>
 
-            <Link :href="`/articulos/${articulo.id}/edit`" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 inline-block">Editar</Link>
-            <Link :href="`/articulos/${articulo.id}`" method="DELETE" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-2 inline-block">Eliminar</Link>
+            <Link :href="`/articulos/${articulo.id}/edit`" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 mx-1 inline-block">Editar</Link>
+            <Link :href="`/articulos/${articulo.id}`" method="DELETE" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-2  mx-1 inline-block">Eliminar</Link>
             </div>
         </li>
     </ul>

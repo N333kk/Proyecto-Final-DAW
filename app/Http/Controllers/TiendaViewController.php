@@ -11,7 +11,7 @@ class TiendaViewController extends Controller
 
     public function index(){
         return Inertia::render('PrincipalTienda', [
-            'articulos' => Articulo::get()
+            'articulos' => Articulo::orderBy('id','desc')->take(4)->get()
         ]);
     }
 }

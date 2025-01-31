@@ -11,8 +11,6 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::apiResource('/articulos', ApiController::class);
-
 
 Route::get('/falta-per-a/{fecha}', function ($fecha) {
     $fechaObjetivo =    Carbon::parse($fecha);

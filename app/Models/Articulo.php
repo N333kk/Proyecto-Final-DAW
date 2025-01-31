@@ -15,4 +15,9 @@ class Articulo extends Model
     {
         return $this->belongsToMany(Pedido::class, 'articulo_pedido', 'articulo_id');
     }
+
+    public function cart_items()
+    {
+        return $this->hasMany(CartItem::class);
+    }
 }

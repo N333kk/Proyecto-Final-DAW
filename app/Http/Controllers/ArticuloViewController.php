@@ -51,7 +51,9 @@ class ArticuloViewController extends Controller
      */
     public function show(Articulo $articulo)
     {
-        //
+        return Inertia::render('Tienda/VerArticulo', [
+            'articulo' => $articulo
+        ]);
     }
 
     /**
