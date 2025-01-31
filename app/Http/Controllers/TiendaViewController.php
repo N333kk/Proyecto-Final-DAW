@@ -10,7 +10,7 @@ class TiendaViewController extends Controller
 {
 
     public function index(){
-        return Inertia::render('PrincipalTienda', [
+        return Inertia::render('Tienda/PrincipalTienda', [
             'articulos' => Articulo::orderBy('id','desc')->take(4)->get()
         ]);
     }

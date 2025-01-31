@@ -220,7 +220,7 @@ const clearPhotoFileInput = () => {
         </template>
 
         <template #actions>
-            <ActionMessage :on="form.recentlySuccessful" class="me-3">
+            <ActionMessage :on="form.wasSuccessful" class="me-3">
                 Saved.
             </ActionMessage>
 

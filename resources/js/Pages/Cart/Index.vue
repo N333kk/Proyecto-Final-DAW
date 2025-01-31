@@ -48,6 +48,7 @@ const precioTotal = computed(() => {
         </div>
 
         <p>Total: {{ precioTotal }} €</p>
+        <Link :href="`/pedidos/`" method="POST" class="bg-zinc-800 hover:bg-zinc-600 text-white font-bold py-2 px-4 rounded mt-2  mx-1 inline-block">Realizar Pedido</Link>
       </div>
 
       <p v-else>Tu carrito está vacío.</p>
