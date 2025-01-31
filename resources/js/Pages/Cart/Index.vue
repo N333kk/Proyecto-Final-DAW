@@ -33,7 +33,7 @@ const precioTotal = computed(() => {
       <h2 class="pt-8 pb-4">Tu Carrito</h2>
 
       <div v-if="cartItems.length > 0">
-        <div v-for="item in cartItems" :key="item.id">
+        <div class="bg-stone-300 p-6 rounded-lg shadow-md flex text-black m-4" v-for="item in cartItems" :key="item.id">
           <p>
             <div class="flex-shrink-0 p-1">
                 <img class="w-24 h-36 object-cover rounded" :src="`${item.articulo.imagen}`" alt="Imagen Articulo">

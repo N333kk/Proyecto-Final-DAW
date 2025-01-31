@@ -18,12 +18,12 @@ Route::get('/', function () {
 });
 
 
-Route::resource('articulos', ArticuloViewController::class);
+Route::resource('/articulos', ArticuloViewController::class);
 
 Route::get('/tienda', function(){
     $controller = new TiendaViewController();
     return $controller->index();
-});
+})->name('tienda');
 
 
 Route::middleware([
