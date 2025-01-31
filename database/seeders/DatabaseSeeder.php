@@ -19,6 +19,9 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
             'rol' => 'admin',
+            'direccion_envio' => 'Calle Falsa 123',
+            'direccion_facturacion' => 'Calle Falsa 123',
+            'telefono' => '123456789',
         ]);
 
         $this->call(PedidosSeeder::class);

@@ -22,6 +22,7 @@ defineProps({
                             <div class="space-x-4">
                             <Link href="/tienda" class="text-sm font-medium text-black dark:text-white/70 hover:text-black dark:hover:text-white/70">Inicio</Link>
                             <Link href="/articulos" class="text-sm font-medium text-black dark:text-white/70 hover:text-black dark:hover:text-white/70">Articulos</Link>
+                            <Link href="/pedidos" class="text-sm font-medium text-black dark:text-white/70 hover:text-black dark:hover:text-white/70">Pedidos</Link>
                             <Link href="/contacto" class="text-sm font-medium text-black dark:text-white/70 hover:text-black dark:hover:text-white/70">Contacto</Link>
                         </div>
                         <Link href="/cart">

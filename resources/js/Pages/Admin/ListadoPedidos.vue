@@ -10,7 +10,23 @@ defineProps({
 
 <template>
 
-<div class="min-h-screen p-8 min-w-screen bg-zinc-900 text-white flex items-center flex-col">
+<div class="bg-zinc-900 text-white">
+    <header class="min-w-full pb-4">
+                    <nav class="flex min-w-screen space-x-4 sm:justify-between justify-center p-6 bg-neutral-600">
+                            <div class="space-x-4">
+                            <Link href="/tienda" class="text-sm font-medium text-black dark:text-white/70 hover:text-black dark:hover:text-white/70">Inicio</Link>
+                            <Link href="/articulos" class="text-sm font-medium text-black dark:text-white/70 hover:text-black dark:hover:text-white/70">Articulos</Link>
+                            <Link href="/pedidos" class="text-sm font-medium text-black dark:text-white/70 hover:text-black dark:hover:text-white/70">Pedidos</Link>
+                            <Link href="/contacto" class="text-sm font-medium text-black dark:text-white/70 hover:text-black dark:hover:text-white/70">Contacto</Link>
+                        </div>
+                        <Link href="/cart">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                            </svg>
+                        </Link>
+                    </nav>
+                </header>
+<div class="p-8">
     <h2 class="p-4 border border-slate-700 rounded-xl bg-slate-800">Listado de pedidos</h2>
     <ul class="p-8 flex flex-col w-full">
       <li class="bg-white p-6 rounded-lg shadow-md flex items-center text-black mb-2">
@@ -32,6 +48,7 @@ defineProps({
         </div>
       </li>
     </ul>
+</div>
   </div>
 
 </template>
