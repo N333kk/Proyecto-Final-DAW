@@ -19,9 +19,9 @@ class ArticuloFactory extends Factory
         return [
             'nombre' => $this->faker->name(),
             'imagen' => $this->faker->imageUrl(),
-            'categoria' => $this->faker->randomElement(['tecnologia', 'ropa', 'hogar']),
+            'categoria' => $this->faker->randomElement(['Tecnologia', 'Ropa', 'Hogar', 'Comida']),
             'descripcion' => $this->faker->text(),
-            'precio' => $this->faker->randomNumber(),
+            'precio' => $this->faker->numberBetween(1,500),
         ];
     }
 }

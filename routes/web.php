@@ -5,6 +5,7 @@ use App\Http\Controllers\ArticuloViewController;
 use App\Http\Controllers\TiendaViewController;
 use App\Http\Controllers\PedidosViewController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\PerfilViewController;
 use App\Http\Controllers\NoAuthController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,8 @@ Route::get('/', function () {
 Route::resource('/articulos', ArticuloViewController::class);
 
 Route::resource('/pedidos', PedidosViewController::class);
+
+Route::resource('/perfil', PerfilViewController::class);
 
 Route::get('/no-auth', [NoAuthController::class, 'index'])->name('no-auth');
 

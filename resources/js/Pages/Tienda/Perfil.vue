@@ -1,14 +1,22 @@
 <script setup>
-
+import AppLayout from '@/Layouts/AppLayout.vue';
+import DeleteUserForm from '@/Pages/Profile/Partials/DeleteUserForm.vue';
+import LogoutOtherBrowserSessionsForm from '@/Pages/Profile/Partials/LogoutOtherBrowserSessionsForm.vue';
+import SectionBorder from '@/Components/SectionBorder.vue';
+import TwoFactorAuthenticationForm from '@/Pages/Profile/Partials/TwoFactorAuthenticationForm.vue';
+import UpdatePasswordForm from '@/Pages/Profile/Partials/UpdatePasswordForm.vue';
+import UpdateProfileInformationForm from '@/Pages/Profile/Partials/UpdateProfileInformationForm.vue';
 import { Link, router } from '@inertiajs/vue3'
 
 const logout = () => {
     router.post(route('logout'));
 };
 
-
 defineProps({
-    articulo: Object,
+    user: Object,
+    confirmsTwoFactorAuthentication: Boolean,
+    sessions: Array,
+
 });
 
 </script>
@@ -19,7 +27,7 @@ defineProps({
                 <header class="min-w-full">
                         <nav class="flex min-w-screen space-x-4 sm:justify-between justify-center p-6 bg-neutral-600">
                             <div class="space-x-4">
-                                <Link href="/tienda" class="text-sm font-medium text-black dark:text-white/70 hover:text-black dark:hover:text-black">Inicio</Link>
+                            <Link href="/tienda" class="text-sm font-medium text-black dark:text-white/70 hover:text-black dark:hover:text-black">Inicio</Link>
                             <Link href="/articulos" class="text-sm font-medium text-black dark:text-white/70 hover:text-black dark:hover:text-black">Articulos</Link>
                             <Link href="/pedidos" class="text-sm font-medium text-black dark:text-white/70 hover:text-black dark:hover:text-black">Pedidos</Link>
                             <Link href="/perfil" class="text-sm font-medium text-black dark:text-white/70 hover:text-black dark:hover:text-black">{{ $page.props.auth.user.name }}</Link>
@@ -37,24 +45,32 @@ defineProps({
                         </Link>
                     </div>
 
-
                         </nav>
                 </header>
 
                 <main class="mt-6 ">
-                    <div class="bg-stone-300 p-8  mx-64 grid grid-cols-2 gap-2 grid-rows-3 rounded-xl">
+                    <div class="bg-stone-300 p-8 mx-64 grid grid-cols-2 gap-2 grid-rows-3 rounded-xl text-zinc-950">
                         <div>
-                        <h1 class="text-zinc-800 text-4xl font-bold px-2">{{ articulo.nombre }}</h1>
-                        <p class="text-zinc-800 font-bold px-2">{{ articulo.categoria }}</p>
-                        </div>
-                        <div class="row-start-2 row-end-2 px-2">
-                            <img class="w-48 h-48 object-cover rounded" :src="`${articulo.imagen}`" alt="Imagen articulo">
-                        </div>
-                        <div class="row-start-2 row-end-3 col-span-2">
+            <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
+                <div v-if="$page.props.jetstream.canUpdateProfileInformation">
+                    <UpdateProfileInformationForm :user=user />
 
-                            <p class="text-zinc-700">{{ articulo.descripcion }}</p>
-                            <p class="text-zinc-900 font-semibold">{{ articulo.precio }} €</p>
-                        </div>
+                    <SectionBorder />
+                </div>
+
+                <div v-if="$page.props.jetstream.canUpdatePassword">
+                    <UpdatePasswordForm class="mt-10 sm:mt-0" />
+
+                    <SectionBorder />
+                </div>
+
+                <template v-if="$page.props.jetstream.hasAccountDeletionFeatures">
+                    <SectionBorder />
+
+                    <DeleteUserForm class="mt-10 sm:mt-0" />
+                </template>
+            </div>
+        </div>
 
                     </div>
                 </main>

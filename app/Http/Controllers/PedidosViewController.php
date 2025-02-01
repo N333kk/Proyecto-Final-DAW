@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 
@@ -17,12 +18,17 @@ class PedidosViewController extends Controller
      */
     public function index()
     {
+        $user = Auth::user();
         $pedidos = Pedido::with('user')->get();
         $usuariosConPedidos = User::has('pedidos')->get();
 
+        $filteredPedidos = $pedidos->filter(function ($pedido) use ($user) {
+            return Gate::allows('view', $pedido);
+        });
+
         return Inertia::render('Admin/ListadoPedidos', [
-            'pedidos' => $pedidos,
-            'usuarios' => $usuariosConPedidos,
+                'pedidos' => $filteredPedidos,
+                'usuarios' => $usuariosConPedidos,
         ]);
     }
 
@@ -41,7 +47,7 @@ class PedidosViewController extends Controller
     {
 
         $pedido = new Pedido();
-        $pedido->estado = "Creado";
+        $pedido->estado = "Pendiente";
         $pedido->direccion_envio = Auth::user()->direccion_envio;
         $pedido->user_id = Auth::id();
         $pedido->save();
