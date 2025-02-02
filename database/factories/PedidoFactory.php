@@ -18,7 +18,7 @@ class PedidoFactory extends Factory
     {
         return [
             'user_id' => $this->faker->numberBetween(1, 10),
-            'estado' => $this->faker->randomElement(['pendiente', 'enviado', 'entregado']),
+            'estado' => $this->faker->randomElement(['Pendiente', 'Enviado', 'Completado']),
             'direccion_envio' => $this->faker->address(),
         ];
     }

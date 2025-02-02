@@ -20,7 +20,7 @@ class ArticuloFactory extends Factory
             'nombre' => $this->faker->name(),
             'imagen' => $this->faker->imageUrl(),
             'categoria' => $this->faker->randomElement(['Tecnologia', 'Ropa', 'Hogar', 'Comida']),
-            'descripcion' => $this->faker->text(),
+            'descripcion' => $this->faker->text(60),
             'precio' => $this->faker->numberBetween(1,500),
         ];
     }

@@ -60,7 +60,7 @@ class PedidoPolicy
         if($user->rol === 'admin'){
             return true;
         } else {
-            if($user->id === $pedido->user_id && $pedido->estado === 'pendiente'){
+            if($user->id === $pedido->user_id && $pedido->estado === 'Pendiente'){
                 return true;
             } else {
                 return false;

@@ -53,7 +53,7 @@ const precioTotal = computed(() => {
             </div>
             <div class="ml-4">
             <h2 class="text-lg font-semibold mb-2">{{ item.articulo.nombre }}</h2>
-            <p class="text-blue-700 font-bold">{{ item.cantidad }}</p>
+            <p class="text-blue-700 font-bold">{{ item.cantidad }} en el carrito</p>
             <p class="text-blue-700 font-semibold">{{ item.articulo.precio }} €</p>
             </div>
             <Link :href="`/cart/${item.articulo.id}`" method="DELETE" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-2  mx-1 inline-block">Eliminar</Link>

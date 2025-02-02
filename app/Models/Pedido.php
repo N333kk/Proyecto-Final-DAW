@@ -10,7 +10,7 @@ class Pedido extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['direccion_envio'];
+    protected $fillable = ['direccion_envio', 'estado'];
 
     public function user()
     {

@@ -39,7 +39,10 @@ defineProps({
                 </header>
 
                 <div class="p-8">
-        <h2 class="p-4 border border-slate-700 rounded-xl bg-slate-800">Listado de articulos</h2>
+                    <div class="p-4 border border-zinc-700 rounded-xl bg-neutral-600 flex justify-between items-center">
+                        <h2 class="text-zinc-900 py-2 px-4">Listado de articulos</h2>
+        <Link v-if="$page.props.auth.user.rol === 'admin'" href="/articulos/create" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Crear Articulo</Link>
+                    </div>
     <ul class="p-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 
         <li class="bg-white p-6 rounded-lg shadow-md flex text-black" v-for="articulo in articulos" :key="articulo.id">
@@ -52,9 +55,11 @@ defineProps({
             <p class="text-blue-700">{{ articulo.descripcion }}</p>
             <p class="text-blue-700 font-semibold">{{ articulo.precio }} €</p>
 
-            <Link :href="`/articulos/${articulo.id}/edit`" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 mx-1 inline-block">Editar</Link>
-            <Link :href="`/articulos/${articulo.id}`" method="DELETE" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-2  mx-1 inline-block">Eliminar</Link>
-            </div>
+            <Link v-if="$page.props.auth.user.rol === 'admin'" :href="`/articulos/${articulo.id}/edit`" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 mx-1 inline-block">Editar</Link>
+            <Link v-if="$page.props.auth.user.rol === 'admin'" :href="`/articulos/${articulo.id}`" method="DELETE" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-2  mx-1 inline-block">Eliminar</Link>
+            <Link :href="`/articulos/${articulo.id}`" class="bg-zinc-800 hover:bg-zinc-500 text-white font-bold py-2 px-4 rounded mt-2 mx-1 inline-block">Mostrar Articulo</Link>
+            <Link :href="`/cart/${articulo.id}`" method="POST" class="bg-zinc-800 hover:bg-zinc-500 text-white font-bold py-2 px-4 rounded mt-2 mx-1 inline-block" @click="addToCart(articulo.id)">Añadir al Carrito</Link>
+        </div>
         </li>
     </ul>
 </div>

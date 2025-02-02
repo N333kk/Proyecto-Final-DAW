@@ -55,8 +55,8 @@ defineProps({
         <p class="text-blue-700 flex-1">{{ pedido.direccion_envio }}</p>
         <p class="text-blue-700 flex-1">{{ pedido.user.name }}</p>
         <div class="flex items-center space-x-4 flex-1">
-          <Link :href="`/pedidos/${pedido.id}/edit`" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Editar</Link>
-          <Link :href="`/pedidos/${pedido.id}`" method="delete" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Eliminar</Link>
+          <Link v-if="$page.props.auth.user.rol === 'admin'" :href="`/pedidos/${pedido.id}/edit`" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Editar</Link>
+          <Link v-if="$page.props.auth.user.rol === 'admin' || $page.props.auth.user.id === pedido.user_id & pedido.estado === 'Pendiente'" :href="`/pedidos/${pedido.id}`" method="delete" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Cancelar</Link>
         </div>
       </li>
     </ul>

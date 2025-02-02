@@ -78,7 +78,10 @@ class PedidosViewController extends Controller
      */
     public function edit(Pedido $pedido)
     {
-        //
+        return Inertia::render('Admin/EditarPedido', [
+            'pedido' => $pedido
+        ]);
+
     }
 
     /**
@@ -86,7 +89,12 @@ class PedidosViewController extends Controller
      */
     public function update(Request $request, Pedido $pedido)
     {
-        //
+        $pedido->update([
+            'direccion_envio' => $request->direccion_envio,
+            'estado' => $request->estado,
+            ]);
+
+            return redirect()->route('pedidos.index');
     }
 
     /**
@@ -94,6 +102,7 @@ class PedidosViewController extends Controller
      */
     public function destroy(Pedido $pedido)
     {
-        //
+        $pedido->delete();
+        return redirect()->back()->with('success', 'Pedido cancelado correctamente');
     }
 }
