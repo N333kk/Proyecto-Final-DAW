@@ -35,6 +35,25 @@ class CartController extends Controller
         return redirect()->route('cart.show');
     }
 
+    public function update($id)
+    {
+        $user = Auth::user();
+        $articulo = Articulo::findOrFail($id);
+
+        $cartItem = CartItem::firstOrCreate(
+            ['user_id' => $user->id, 'articulo_id' => $id],
+            ['cantidad' => 0, 'precio' => $articulo->precio]
+        );
+        if ($cartItem->cantidad > 1) {
+            $cartItem->decrement('cantidad', 1);
+        } else {
+            $cartItem->delete();
+        }
+
+
+        return redirect()->route('cart.show');
+    }
+
     public function removeFromCart($id)
     {
         $user = Auth::user();

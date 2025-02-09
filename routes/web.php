@@ -44,5 +44,6 @@ Route::middleware([
     Route::get('/dashboard', [AdminController::class, 'show'])->name('dashboard');
     Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
     Route::post('/cart/{id}', [CartController::class, 'store']);
+    Route::put('/cart/{id}', [CartController::class, 'update']);
     Route::delete('/cart/{id}', [CartController::class, 'RemoveFromCart'])->name('cart.remove');
 });

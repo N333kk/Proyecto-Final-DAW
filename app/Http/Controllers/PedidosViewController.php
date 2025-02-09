@@ -45,7 +45,9 @@ class PedidosViewController extends Controller
      */
     public function store(Request $request)
     {
-
+        if(Auth::user()->direccion_envio == null){
+            return redirect()->route('perfil')->with('error', 'Tienes que tener una direccion de envio!');
+        }
         $pedido = new Pedido();
         $pedido->estado = "Pendiente";
         $pedido->direccion_envio = Auth::user()->direccion_envio;
