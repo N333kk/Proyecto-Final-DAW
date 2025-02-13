@@ -33,7 +33,6 @@ class User extends Authenticatable
         'telefono',
         'direccion_envio',
         'direccion_facturacion',
-
     ];
 
     /**

@@ -7,6 +7,7 @@ use App\Http\Controllers\PedidosViewController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PerfilViewController;
 use App\Http\Controllers\NoAuthController;
+use App\Http\Controllers\ClienteController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +35,8 @@ Route::get('/tienda', function(){
     $controller = new TiendaViewController();
     return $controller->index();
 })->name('tienda');
+
+Route::get('/dashboard/{id}/ban', [ClienteController::class, 'ban']);
 
 
 Route::middleware([

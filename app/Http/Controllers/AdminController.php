@@ -15,9 +15,9 @@ class AdminController extends Controller
         if($user->rol !== 'admin'){
             return redirect()->route('no-auth');
         } else {
-            return Inertia::render('Admin/Dashboard');
-
-
+            return Inertia::render('Admin/Dashboard', [
+                'users' => User::get()
+            ]);
     }
 }
 }

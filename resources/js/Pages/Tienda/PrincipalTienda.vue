@@ -59,7 +59,7 @@ defineProps({
 
                 <main class="mt-6">
                     <div class="min-h-screen min-w-screen flex flex-col items-center justify-center">
-                        <h1 class="text-4xl font-bold text-center">Ultimos Articulos</h1>
+                        <h1 v-if="$page.props.auth.user" class="text-4xl font-bold text-center">Bienvenido {{ $page.props.auth.user.name }}</h1>
                         <p class="mt-4 text-center text-lg text-black dark:text-white/70">
                             Aqui podras encontrar los articulos mas recientes.
                         </p>

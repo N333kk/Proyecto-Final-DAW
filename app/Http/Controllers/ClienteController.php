@@ -70,6 +70,15 @@ class ClienteController extends Controller
         ]);
     }
 
+    public function ban($id)
+    {
+        $cliente = User::find($id);
+
+        $cliente->update('is_banned' (true));
+
+
+    }
+
     /**
      * Remove the specified resource from storage.
      */
