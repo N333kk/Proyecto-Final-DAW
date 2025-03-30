@@ -31,7 +31,8 @@ defineProps({
                             <Link href="/articulos" class="text-sm font-medium  hover:text-black dark:hover:text-white/50">Articulos</Link>
                             <Link href="/pedidos" class="text-sm font-medium  hover:text-black dark:hover:text-white/50">Pedidos</Link>
                             <Link href="/perfil" class="text-sm font-medium  hover:text-black dark:hover:text-white/50">{{ $page.props.auth.user.name }}</Link>
-
+                            <Link v-if="$page.props.auth.user.rol == 'admin'" href="/dashboard"
+                            class="text-sm font-medium  hover:text-black dark:hover:text-white/50">Dashboard</Link>
                         </div>
                         <div class="flex">
                             <form @submit.prevent="logout">

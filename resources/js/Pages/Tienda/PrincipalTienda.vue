@@ -41,6 +41,8 @@ defineProps({
                                 Register
                             </Link>
                         </template>
+                        <Link v-if="$page.props.auth.user && $page.props.auth.user.rol == 'admin'" href="/dashboard"
+                            class="text-sm font-medium  hover:text-black dark:hover:text-white/50">Dashboard</Link>
                         </div>
                         <div class="flex">
                             <form v-if="$page.props.auth.user" @submit.prevent="logout">
@@ -60,6 +62,9 @@ defineProps({
                 <main class="mt-6">
                     <div class="min-h-screen min-w-screen flex flex-col items-center justify-center">
                         <h1 v-if="$page.props.auth.user" class="text-4xl font-bold text-center">Bienvenido {{ $page.props.auth.user.name }}</h1>
+                        <template v-else>
+                            <h1 class="text-4xl font-bold text-center">Bienvenido a la tienda!</h1>
+                        </template>
                         <p class="mt-4 text-center text-lg text-black dark:text-white/70">
                             Aqui podras encontrar los articulos mas recientes.
                         </p>

@@ -39,6 +39,8 @@ defineProps({
                             Register
                             </Link>
                         </template>
+                        <Link v-if="$page.props.auth.user && $page.props.auth.user.rol == 'admin'" href="/dashboard"
+                            class="text-sm font-medium  hover:text-black dark:hover:text-white/50">Dashboard</Link>
                     </div>
                     <div class="flex">
                         <form v-if="$page.props.auth.user" @submit.prevent="logout">

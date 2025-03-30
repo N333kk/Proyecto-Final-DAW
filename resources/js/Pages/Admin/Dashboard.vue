@@ -8,6 +8,8 @@ const logout = () => {
 
 const props = defineProps({
     users: Object,
+    articulos: Object,
+    pedidos: Object,
 });
 
 </script>
@@ -37,6 +39,8 @@ const props = defineProps({
                             Register
                             </Link>
                         </template>
+                        <Link v-if="$page.props.auth.user.rol == 'admin'" href="/dashboard"
+                            class="text-sm font-medium  hover:text-black dark:hover:text-white/50">Dashboard</Link>
                     </div>
                     <div class="flex">
                         <form v-if="$page.props.auth.user" @submit.prevent="logout">
@@ -61,22 +65,76 @@ const props = defineProps({
                     <h2 class="text-white py-2 px-4 font-bold text-4xl">Dashboard</h2>
                 </div>
                 <div class=" text-white rounded-xl bg-black mt-4 mx-8">
-                    <div class="text-white py-3 px-4 border-b border-l border-r border-t rounded-tl-lg rounded-tr-lg border-white/25 bg-gradient-to-r from-black to-white/5">
-                    <h2 class="font-bold text-1xl">Listado Usuarios</h2>
+                    <div
+                        class="text-white py-3 px-4 border-b border-l border-r border-t rounded-tl-lg rounded-tr-lg border-white/25 bg-gradient-to-r from-black to-white/15">
+                        <h2 class="font-bold text-1xl">Listado Usuarios</h2>
                     </div>
+                    <div
+                        class="flex items-center text-white py-3 px-4 border-b border-l border-r border-white/25 bg-gradient-to-r from-black to-white/15">
+                        <h2 class="px-2 font-bold text-1xl flex-1 my-4">Nombre</h2>
+                        <h2 class="font-bold text-1xl flex-1 my-4  px-4">Telefono</h2>
+                        <h2 class="font-bold text-1xl flex-1 my-4 px-4">Direccion</h2>
+                        <h2 class="font-bold text-1xl flex-1 my-4 px-4">Direccion Facturacion</h2>
+                        <h2 class="font-bold text-1xl flex-1 my-4 px-4">Rol</h2>
+                    </div>
+                    <ul class=" border-b border-l border-r mb-8 border-white/25 rounded-br-lg rounded-bl-lg ">
+                        <li v-for="(user, index) in users" :key="user.id"
+                            :class="{ 'border-b border-white/30': index !== users.length - 1 }"
+                            class="flex items-center bg-gradient-to-r from-black to-white/15">
+                            <span class="px-4 font-semibold flex-1 my-4"> {{ user.name }} </span>
+                            <span class="font-semibold flex-1 my-4 px-4"> {{ user.telefono }}</span>
+                            <span class="font-semibold flex-1 my-4 px-4"> {{ user.direccion_envio }}</span>
+                            <span class="font-semibold flex-1 my-4 px-4"> {{ user.direccion_facturacion }}</span>
+                            <span class="font-semibold flex-1 my-4 px-4"> {{ user.rol }}</span>
+                        </li>
+                    </ul>
 
-                <ul class=" border-b border-l border-r mb-8 border-white/25 rounded-br-lg rounded-bl-lg ">
-                    <li v-for="(user, index) in users" :key="user.id"
-                        :class="{'border-b border-white/30': index !== users.length - 1}"
-                        class="flex items-center bg-gradient-to-r from-black to-white/5">
-                        <span class="px-4 font-semibold flex-1 my-4"> {{ user.name }} </span>
-                        <span class="font-semibold flex-1 my-4"> {{ user.telefono }}</span>
-                        <span class="font-semibold flex-1 my-4"> {{ user.direccion_envio }}</span>
-                        <span class="font-semibold flex-1 my-4"> {{ user.direccion_facturacion }}</span>
-                        <span class="font-semibold flex-1 my-4"> {{ user.rol }}</span>
-                    </li>
-                </ul>
-            </div>
+                    <div
+                        class="text-white py-3 px-4 border-b border-l border-r border-t rounded-tl-lg rounded-tr-lg border-white/25 bg-gradient-to-r from-black to-white/15">
+                        <h2 class="font-bold text-1xl">Listado Articulos</h2>
+                    </div>
+                    <div
+                        class="flex items-center text-white py-3 px-4 border-b border-l border-r border-white/25 bg-gradient-to-r from-black to-white/15">
+                        <h2 class="px-2 font-bold text-1xl flex-1 my-4">Nombre</h2>
+                        <h2 class="font-bold text-1xl flex-1 my-4  px-4">Categoria</h2>
+                        <h2 class="font-bold text-1xl flex-1 my-4 px-4">Descripcion</h2>
+                        <h2 class="font-bold text-1xl flex-1 my-4 px-4">Precio</h2>
+                        <h2 class="font-bold text-1xl flex-1 my-4 px-4">Ultima Actualizacion</h2>
+                    </div>
+                    <ul class=" border-b border-l border-r mb-8 border-white/25 rounded-br-lg rounded-bl-lg ">
+                        <li v-for="(articulo, index) in articulos" :key="articulo.id"
+                            :class="{ 'border-white/30 border-b rounded-br-lg rounded-bl-lg': index !== articulos.length - 1 }"
+                            class="flex items-center bg-gradient-to-r from-black to-white/15">
+                            <span class="px-4 font-semibold flex-1 my-4"> {{ articulo.nombre }} </span>
+                            <span class="font-semibold flex-1 my-4 px-4"> {{ articulo.categoria }}</span>
+                            <span class="font-semibold flex-1 my-4 px-4"> {{ articulo.descripcion }}</span>
+                            <span class="font-semibold flex-1 my-4 px-4"> {{ articulo.precio }}</span>
+                            <span class="font-semibold flex-1 my-4 px-4"> {{ articulo.updated_at.slice(0,10) }}</span>
+                        </li>
+                    </ul>
+
+                    <div
+                        class="text-white py-3 px-4 border-b border-l border-r border-t rounded-tl-lg rounded-tr-lg border-white/25 bg-gradient-to-r from-black to-white/15">
+                        <h2 class="font-bold text-1xl">Listado Pedidos</h2>
+                    </div>
+                    <div
+                        class="flex items-center text-white py-3 px-4 border-b border-l border-r border-white/25 bg-gradient-to-r from-black to-white/15">
+                        <h2 class="px-2 font-bold text-1xl flex-1 my-4">Cliente</h2>
+                        <h2 class="font-bold text-1xl flex-1 my-4  px-4">Estado</h2>
+                        <h2 class="font-bold text-1xl flex-1 my-4 px-4">Direccion</h2>
+                        <h2 class="font-bold text-1xl flex-1 my-4 px-4">Ultima Actualizacion</h2>
+                    </div>
+                    <ul class=" border-b border-l border-r mb-8 border-white/25 rounded-br-lg rounded-bl-lg ">
+                        <li v-for="(pedido, index) in pedidos" :key="pedido.id"
+                            :class="{ 'border-b border-white/30': index !== pedidos.length - 1 }"
+                            class="flex items-center bg-gradient-to-r from-black to-white/15">
+                            <span class="px-4 font-semibold flex-1 my-4"> {{ users.find(user => user.id === pedido.user_id)?.name || 'N/A' }} </span>
+                            <span class="font-semibold flex-1 my-4 px-4"> {{ pedido.estado }}</span>
+                            <span class="font-semibold flex-1 my-4 px-4"> {{ pedido.direccion_envio }}</span>
+                            <span class="font-semibold flex-1 my-4 px-4"> {{ pedido.updated_at.slice(0,10) }}</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
