@@ -6,7 +6,7 @@ Nuestra tienda tambien dispondra de un sistema de manejo de pedidos para los adm
 
 ----
 
-A dia 31/01/2025 El proyecto cuenta con las siguientes funcionalidades :
+A dia 30/03/2025 El proyecto cuenta con las siguientes funcionalidades :
 
 * Sistema de Login y Registro.
 * Landing page de la tienda.
@@ -16,11 +16,4 @@ A dia 31/01/2025 El proyecto cuenta con las siguientes funcionalidades :
 * Sistema de gestion de pedidos final.
 * Sistema de carrito.
 * Sistema de gestion de usuarios.
-
-Aun tengo que añadir :
-
-* Mejoras en sistema de carrito(Añadir mas cantidad de articulos desde el propio carrito).
-* Mejoras en sistema de gestion de articulos(Ver stock de articulos o Imagen placeholder dependiendo de la categoria del articulo)
-* Mejoras en migraciones y estructura de base de datos(Añadir stock para los articulos, Arreglar fallos que pueden ir surgiendo mientras acabo el desarrollo)
-
-![](public/images/1.png)
+* Sistema de dashboard para el administrador, donde se pueden ver la mayoria de datos relevantes de la aplicacion.
