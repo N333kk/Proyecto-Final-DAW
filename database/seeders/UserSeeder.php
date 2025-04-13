@@ -2,19 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\Pedido;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
 
-class PedidosSeeder extends Seeder
+class UserSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-
-
-        Pedido::factory(10)->create();
+        User::factory(9)->create();
     }
 }

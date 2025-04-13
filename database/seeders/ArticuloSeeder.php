@@ -2,19 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\Pedido;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Articulo;
 
-class PedidosSeeder extends Seeder
+class ArticuloSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-
-
-        Pedido::factory(10)->create();
+        Articulo::factory(10)->create();
     }
 }

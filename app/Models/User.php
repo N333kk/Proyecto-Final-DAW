@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Cashier\Billable;
 use App\Models\CartItem;
 
 class User extends Authenticatable
@@ -20,6 +21,7 @@ class User extends Authenticatable
     use HasProfilePhoto;
     use Notifiable;
     use TwoFactorAuthenticatable;
+    use Billable;
 
     /**
      * The attributes that are mass assignable.
@@ -72,6 +74,12 @@ class User extends Authenticatable
     public function pedidos()
     {
         return $this->hasMany(Pedido::class);
+    }
+
+    public function articulos_favoritos()
+    {
+        return $this->belongsToMany(Articulo::class, 'articulos_favoritos', 'user_id', 'articulo_id')
+        ->withTimestamps();
     }
 
     public function cartItem()

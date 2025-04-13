@@ -16,6 +16,12 @@ class Articulo extends Model
         return $this->belongsToMany(Pedido::class, 'articulo_pedido', 'articulo_id');
     }
 
+    public function favByUsers()
+    {
+        return $this->belongsToMany(User::class, 'articulos_favoritos', 'articulo_id', 'user_id')
+        ->withTimestamps();
+    }
+
     public function cart_items()
     {
         return $this->hasMany(CartItem::class);
