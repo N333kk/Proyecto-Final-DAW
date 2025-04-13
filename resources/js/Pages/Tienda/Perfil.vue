@@ -1,5 +1,6 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import logoImage from '../../../images/logo.png';
 import DeleteUserForm from '@/Pages/Profile/Partials/DeleteUserForm.vue';
 import LogoutOtherBrowserSessionsForm from '@/Pages/Profile/Partials/LogoutOtherBrowserSessionsForm.vue';
 import SectionBorder from '@/Components/SectionBorder.vue';
@@ -23,11 +24,15 @@ defineProps({
 
 <template>
     <div class="bg-gray-50 text-black/50 dark:bg-black dark:text-white  min-h-screen">
+
         <div class="flex flex-col items-center justify-center selection:bg-[#FF2D20] selection:text-white">
                 <header class="min-w-full">
                     <nav class="flex min-w-screen space-x-4 sm:justify-between justify-center p-6 bg-black text-white dark:text-white/80 border-b border-white/20">
                             <div class="space-x-4">
-                                <Link href="/tienda" class="text-sm font-medium  hover:text-black dark:hover:text-white/50">Inicio</Link>
+                                <div>
+                                    <img :src="logoImage" style="height:96px;" alt="Logo">
+                                </div>
+                            <Link href="/tienda" class="text-sm font-medium  hover:text-black dark:hover:text-white/50">Inicio</Link>
                             <Link href="/articulos" class="text-sm font-medium  hover:text-black dark:hover:text-white/50">Articulos</Link>
                             <Link href="/pedidos" class="text-sm font-medium  hover:text-black dark:hover:text-white/50">Pedidos</Link>
                             <Link href="/perfil" class="text-sm font-medium  hover:text-black dark:hover:text-white/50">{{ $page.props.auth.user.name }}</Link>
