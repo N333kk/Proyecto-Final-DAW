@@ -48,5 +48,7 @@ Route::middleware([
     Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
     Route::post('/cart/{id}', [CartController::class, 'store']);
     Route::put('/cart/{id}', [CartController::class, 'update']);
-    Route::delete('/cart/{id}', [CartController::class, 'RemoveFromCart'])->name('cart.remove');
+    Route::delete('/cart/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
+    Route::get('/checkout/success', [CartController::class, 'checkoutSuccess'])->name('checkout.success');
+    Route::get('/checkout/cancel', [CartController::class, 'checkoutCancel'])->name('checkout.cancel');
 });
