@@ -82,8 +82,8 @@ class User extends Authenticatable
         ->withTimestamps();
     }
 
-    public function cartItem()
+    public function cart()
     {
-        return $this->hasMany(CartItem::class);
+        return $this->hasOne(Cart::class);
     }
 }
