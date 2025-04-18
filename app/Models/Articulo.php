@@ -9,7 +9,7 @@ class Articulo extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nombre', 'imagen', 'categoria', 'descripcion', 'precio'];
+    protected $fillable = ['nombre', 'categoria', 'descripcion', 'precio'];
 
     public function pedidos()
     {
@@ -20,6 +20,16 @@ class Articulo extends Model
     {
         return $this->belongsToMany(User::class, 'articulos_favoritos', 'articulo_id', 'user_id')
         ->withTimestamps();
+    }
+
+    public function imagenes()
+    {
+        return $this->hasMany(Imagen::class);
+    }
+
+    public function categoria()
+    {
+        return $this->belongsToMany(Categoria::class, 'articulo_categoria');
     }
 
     public function cart_items()

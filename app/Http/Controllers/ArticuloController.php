@@ -29,6 +29,13 @@ class ArticuloController extends Controller
         $articulo->name = $request->input('name');
         $articulo->precio = $request->input('precio');
 
+        foreach ($request->file('imagenes') as $imagen) {
+            $path = $imagen->store('articulos', 'public');
+            $articulo->imagenes()->create([
+                'ruta' => $path
+            ]);
+        }
+
         $articulo->save();
 
         return response()->json([
@@ -52,17 +59,20 @@ class ArticuloController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        $articulo = Articulo::find($id);
+    public function update(Request $request, $id)
+{
+    $articulo = Articulo::findOrFail($id);
+    $articulo->update($request->only(['nombre', 'descripcion', 'precio']));
 
-        $articulo->update($request->all());
-
-        return response()->json([
-            'message' => 'Articulo actualizado',
-            'articulo' => $articulo
-        ]);
+    if ($request->hasFile('imagenes')) {
+        foreach ($request->file('imagenes') as $imagen) {
+            $path = $imagen->store('articulos', 'public');
+            $articulo->imagenes()->create(['ruta' => $path]);
+        }
     }
+
+    return response()->json(['message' => 'Artículo actualizado']);
+}
 
     /**
      * Remove the specified resource from storage.
