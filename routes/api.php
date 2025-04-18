@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\ImagenController;
 use App\Http\Controllers\PedidosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +21,8 @@ Route::get('/falta-per-a/{fecha}', function ($fecha) {
     return response()->json(['message' =>
     "Falten	$tiempoRestante per a $fecha"]);
 });
+
+Route::delete('/imagenes/{id}', [ImagenController::class, 'destroy']);
 
 Route::apiResource('/clientes', ClienteController::class);
 
