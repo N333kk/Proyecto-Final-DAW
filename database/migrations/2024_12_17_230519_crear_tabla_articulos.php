@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('articulos', function (Blueprint $tabla) {
             $tabla->id();
             $tabla->string('nombre');
-            $tabla->string('imagen');
-            $tabla->string('categoria');
+            $tabla->string('categoria_id');
             $tabla->string('descripcion');
             $tabla->integer('precio');
             $tabla->timestamps();
