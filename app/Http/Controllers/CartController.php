@@ -92,7 +92,7 @@ class CartController extends Controller
     {
         $user = Auth::user();
 
-        if(empty($user->direccion_envio)) {
+        if (empty($user->direccion_envio)) {
             return redirect()->route('profile.edit')->with('error', 'Necesitas añadir una dirección de envío.');
         }
 
@@ -102,13 +102,30 @@ class CartController extends Controller
 
         $cartItems = CartItem::with('articulo')->where('cart_id', $cart->id)->get();
 
-        if($cartItems->isEmpty()) {
+        if ($cartItems->isEmpty()) {
             return redirect()->route('cart.show')->with('error', 'El carrito está vacío.');
+        }
+
+        $lineItems = [];
+
+        foreach ($cartItems as $item) {
+            $lineItems[] = [
+                'price_data' => [
+                    'currency' => 'eur',
+                    'product_data' => [
+                        'name' => $item->articulo->nombre,
+                        'images' => [$item->articulo->imagen],
+                        'description' => $item->articulo->descripcion,
+                    ],
+                    'unit_amount' => $item->precio * 100, // Stripe usa céntimos...
+                ],
+                'quantity' => $item->cantidad,
+            ];
         }
 
         // Calcular total del precio del carrito
         $total = 0;
-        foreach($cartItems as $item) {
+        foreach ($cartItems as $item) {
             $total += $item->precio * $item->cantidad;
         }
 
@@ -117,7 +134,7 @@ class CartController extends Controller
         try {
             $session = Session::create([
                 'payment_method_types' => ['card'],
-                'line_items' => $this->prepareLineItems($cartItems),
+                'line_items' => $lineItems,
                 'mode' => 'payment',
                 'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => route('checkout.cancel'),
@@ -132,86 +149,84 @@ class CartController extends Controller
             session(['stripe_session_id' => $session->id]);
 
             return Inertia::location($session->url);
-
         } catch (\Exception $e) {
             return redirect()->route('cart.show')->with('error', 'Error al procesar el pago: ' . $e->getMessage());
         }
     }
 
     private function prepareLineItems($cartItems)
-{
-    $lineItems = [];
+    {
+        $lineItems = [];
 
-    foreach($cartItems as $item) {
-        $lineItems[] = [
-            'price_data' => [
-                'currency' => 'eur',
-                'product_data' => [
-                    'name' => $item->articulo->nombre,
-                    'images' => [$item->articulo->imagen],
-                    'description' => $item->articulo->descripcion,
-                ],
-                'unit_amount' => $item->precio * 100, // Stripe usa céntimos...
-            ],
-            'quantity' => $item->cantidad,
-        ];
-    }
-
-    return $lineItems;
-}
-
-public function checkoutSuccess(Request $request)
-{
-    $sessionId = $request->get('session_id');
-    $stripeSessionId = session('stripe_session_id');
-
-    // Verificar que el ID de sesión coincide con el almacenado
-    if ($sessionId !== $stripeSessionId) {
-        return redirect()->route('cart.show')->with('error', 'Error en la validación del pago.');
-    }
-
-    \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
-
-    try {
-        // Recuperar la sesión de Stripe
-        $session = \Stripe\Checkout\Session::retrieve($sessionId);
-
-        if ($session->payment_status !== 'paid') {
-            return redirect()->route('cart.show')->with('error', 'El pago no ha sido completado.');
-        }
-
-        $user = Auth::user();
-        $cart = Cart::where('user_id', $user->id)->first();
-        $cartItems = CartItem::with('articulo')->where('cart_id', $cart->id)->get();
-
-        // Crear el pedido
-        $pedido = new \App\Models\Pedido();
-        $pedido->user_id = $user->id;
-        $pedido->estado = 'Pendiente';
-        $pedido->direccion_envio = $user->direccion_envio;
-        $pedido->save();
-
-        // Añadir los artículos al pedido
         foreach ($cartItems as $item) {
-            $pedido->articulos()->attach($item->articulo_id, [
-                'cantidad' => $item->cantidad,
-                'precio' => $item->precio
-            ]);
+            $lineItems[] = [
+                'price_data' => [
+                    'currency' => 'eur',
+                    'product_data' => [
+                        'name' => $item->articulo->nombre,
+                        'images' => [$item->articulo->imagen],
+                        'description' => $item->articulo->descripcion,
+                    ],
+                    'unit_amount' => $item->precio * 100, // Stripe usa céntimos...
+                ],
+                'quantity' => $item->cantidad,
+            ];
         }
 
-        // Limpiamos el carrito, no usamos la funcion clearCart() para evitar el redirect
-        CartItem::where('cart_id', $cart->id)->delete();
-
-        return redirect()->route('pedidos.index')->with('success', 'Pedido realizado con éxito.');
-
-    } catch (\Exception $e) {
-        return redirect()->route('cart.show')->with('error', 'Error al procesar el pago: ' . $e->getMessage());
+        return $lineItems;
     }
-}
 
-public function checkoutCancel()
-{
-    return redirect()->route('cart.show')->with('info', 'Pago cancelado.');
-}
+    public function checkoutSuccess(Request $request)
+    {
+        $sessionId = $request->get('session_id');
+        $stripeSessionId = session('stripe_session_id');
+
+        // Verificar que el ID de sesión coincide con el almacenado
+        if ($sessionId !== $stripeSessionId) {
+            return redirect()->route('cart.show')->with('error', 'Error en la validación del pago.');
+        }
+
+        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+
+        try {
+            // Recuperar la sesión de Stripe
+            $session = \Stripe\Checkout\Session::retrieve($sessionId);
+
+            if ($session->payment_status !== 'paid') {
+                return redirect()->route('cart.show')->with('error', 'El pago no ha sido completado.');
+            }
+
+            $user = Auth::user();
+            $cart = Cart::where('user_id', $user->id)->first();
+            $cartItems = CartItem::with('articulo')->where('cart_id', $cart->id)->get();
+
+            // Crear el pedido
+            $pedido = new \App\Models\Pedido();
+            $pedido->user_id = $user->id;
+            $pedido->estado = 'Pendiente';
+            $pedido->direccion_envio = $user->direccion_envio;
+            $pedido->save();
+
+            // Añadir los artículos al pedido
+            foreach ($cartItems as $item) {
+                $pedido->articulos()->attach($item->articulo_id, [
+                    'cantidad' => $item->cantidad,
+                    'precio' => $item->precio
+                ]);
+            }
+
+            // Limpiamos el carrito, no usamos la funcion clearCart() para evitar el redirect
+            CartItem::where('cart_id', $cart->id)->delete();
+
+            return redirect()->route('pedidos.index')->with('success', 'Pedido realizado con éxito.');
+        } catch (\Exception $e) {
+            return redirect()->route('cart.show')->with('error', 'Error al procesar el pago: ' . $e->getMessage());
+        }
+    }
+
+    public function checkoutCancel()
+    {
+        return redirect()->route('cart.show')->with('info', 'Pago cancelado.');
+    }
     // TODO: Funciones auxiliares para el checkout
 }
