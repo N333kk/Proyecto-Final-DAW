@@ -46,9 +46,12 @@ Route::middleware([
 ])->group(function () {
     Route::get('/dashboard', [AdminController::class, 'show'])->name('dashboard');
     Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
+    Route::post('/cart/clear', [CartController::class, 'clearCart'])->name('cart.clear');
+    Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+    Route::get('cart/checkout/success', [CartController::class, 'checkoutSuccess'])->name('cart.checkout.success');
+    Route::get('cart/checkout/cancel', [CartController::class, 'checkoutCancel'])->name('cart.checkout.cancel');
     Route::post('/cart/{id}', [CartController::class, 'store']);
     Route::put('/cart/{id}', [CartController::class, 'update']);
     Route::delete('/cart/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
-    Route::get('/checkout/success', [CartController::class, 'checkoutSuccess'])->name('checkout.success');
-    Route::get('/checkout/cancel', [CartController::class, 'checkoutCancel'])->name('checkout.cancel');
+
 });
