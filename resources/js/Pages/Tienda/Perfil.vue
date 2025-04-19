@@ -7,7 +7,7 @@ import SectionBorder from '@/Components/SectionBorder.vue';
 import TwoFactorAuthenticationForm from '@/Pages/Profile/Partials/TwoFactorAuthenticationForm.vue';
 import UpdatePasswordForm from '@/Pages/Profile/Partials/UpdatePasswordForm.vue';
 import UpdateProfileInformationForm from '@/Pages/Profile/Partials/UpdateProfileInformationForm.vue';
-import { Link, router } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
 
 const logout = () => {
     router.post(route('logout'));
@@ -23,6 +23,7 @@ defineProps({
 </script>
 
 <template>
+    <Head title="Mi Perfil" />
     <div class="bg-gray-50 text-black/50 dark:bg-black dark:text-white  min-h-screen">
 
         <div class="flex flex-col items-center justify-center selection:bg-[#FF2D20] selection:text-white">

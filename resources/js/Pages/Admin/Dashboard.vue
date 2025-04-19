@@ -1,6 +1,6 @@
 <script setup>
 
-import { Link, router } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
 
 const logout = () => {
     router.post(route('logout'));
@@ -15,6 +15,7 @@ const props = defineProps({
 </script>
 
 <template>
+    <Head title="Admin Dashboard" />
     <div class="bg-gray-50 text-black/50 dark:bg-black dark:text-white  min-h-screen">
         <div class="flex flex-col items-center justify-center selection:bg-[#FF2D20] selection:text-white">
             <header class="min-w-full">
