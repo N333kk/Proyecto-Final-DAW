@@ -24,24 +24,39 @@ class ArticuloController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'descripcion' => 'required|string',
+            'precio' => 'required|numeric',
+            'categoria_id' => 'required|exists:categorias,id',
+            'imagen' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
         $articulo = new Articulo;
+        $articulo->nombre = $request->nombre;
+        $articulo->descripcion = $request->descripcion;
+        $articulo->precio = $request->precio;
+        $articulo->save();
 
-        $articulo->name = $request->input('name');
-        $articulo->precio = $request->input('precio');
+        // Manejar la relación con la categoría
+        if ($request->categoria_id) {
+            $articulo->categoria()->attach($request->categoria_id);
+        }
 
-        foreach ($request->file('imagenes') as $imagen) {
-            $path = $imagen->store('articulos', 'public');
-            $articulo->imagenes()->create([
-                'ruta' => $path
+        // Procesar la imagen
+        if ($request->hasFile('imagen')) {
+            $path = $request->file('imagen')->store('articulos', 'public');
+            $articulo->imagenes()->create(['ruta' => $path]);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Articulo añadido correctamente',
+                'articulo' => $articulo
             ]);
         }
 
-        $articulo->save();
-
-        return response()->json([
-            'message' => 'Articulo añadido correctamente',
-            'articulo' => $articulo
-        ]);
+        return redirect()->route('articulos.index')->with('success', 'Artículo creado correctamente');
     }
 
     /**
@@ -60,19 +75,41 @@ class ArticuloController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
-{
-    $articulo = Articulo::findOrFail($id);
-    $articulo->update($request->only(['nombre', 'descripcion', 'precio']));
+    {
+        $rules = [
+            'nombre' => 'required|string|max:255',
+            'descripcion' => 'required|string',
+            'precio' => 'required|numeric',
+            'categoria_id' => 'required|exists:categorias,id',
+            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048' // Cambiado a nullable
+        ];
 
-    if ($request->hasFile('imagenes')) {
-        foreach ($request->file('imagenes') as $imagen) {
-            $path = $imagen->store('articulos', 'public');
-            $articulo->imagenes()->create(['ruta' => $path]);
+        $request->validate($rules);
+
+        $articulo = Articulo::findOrFail($id);
+
+        // Actualizar los campos del artículo
+        $articulo->nombre = $request->nombre;
+        $articulo->descripcion = $request->descripcion;
+        $articulo->precio = $request->precio;
+
+        if ($request->categoria_id) {
+            $articulo->categoria()->sync([$request->categoria_id]);
         }
-    }
 
-    return response()->json(['message' => 'Artículo actualizado']);
-}
+        $articulo->save();
+
+        if ($request->hasFile('imagen')) {
+            $path = $request->file('imagen')->store('articulos', 'public');
+            $articulo->imagenes()->create(['ruta' => $path, 'articulo_id' => $articulo->id]);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Artículo actualizado']);
+        }
+
+        return redirect()->back()->with('success', 'Artículo actualizado correctamente');
+    }
 
     /**
      * Remove the specified resource from storage.

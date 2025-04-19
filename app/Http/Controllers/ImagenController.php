@@ -16,11 +16,15 @@ class ImagenController extends Controller
     {
 
         $request->validate([
-            'imagen' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'imagen' => 'nullable|file|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
 
-        $path = $request->file('imagen')->store('articulos', 'public');
+        if ($request->hasFile('imagen')) {
+            $path = $request->file('imagen')->store('articulos', 'public');
+        } else {
+            $path = null;
+        }
 
         return response()->json([
             'message' => 'Imagen almacenada correctamente',
