@@ -38,12 +38,10 @@ class ArticuloController extends Controller
         $articulo->precio = $request->precio;
         $articulo->save();
 
-        // Manejar la relación con la categoría
         if ($request->categoria_id) {
             $articulo->categoria()->attach($request->categoria_id);
         }
 
-        // Procesar la imagen
         if ($request->hasFile('imagen')) {
             $path = $request->file('imagen')->store('articulos', 'public');
             $articulo->imagenes()->create(['ruta' => $path]);
@@ -81,14 +79,13 @@ class ArticuloController extends Controller
             'descripcion' => 'required|string',
             'precio' => 'required|numeric',
             'categoria_id' => 'required|exists:categorias,id',
-            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048' // Cambiado a nullable
+            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ];
 
         $request->validate($rules);
 
         $articulo = Articulo::findOrFail($id);
 
-        // Actualizar los campos del artículo
         $articulo->nombre = $request->nombre;
         $articulo->descripcion = $request->descripcion;
         $articulo->precio = $request->precio;
