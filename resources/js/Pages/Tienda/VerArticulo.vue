@@ -57,10 +57,14 @@ defineProps({
                     <div class="bg-stone-300 p-8  mx-64 grid grid-cols-2 gap-2 grid-rows-3 rounded-xl">
                         <div>
                         <h1 class="text-zinc-800 text-4xl font-bold px-2">{{ articulo.nombre }}</h1>
-                        <p class="text-zinc-800 font-bold px-2">{{ articulo.categoria }}</p>
+                        <p class="text-zinc-800 font-bold px-2">{{ articulo.categoria && articulo.categoria.length > 0
+     ? articulo.categoria[0].nombre
+     : 'Sin categoría' }}</p>
                         </div>
                         <div class="row-start-2 row-end-2 px-2">
-                            <img class="w-48 h-48 object-cover rounded" :src="`${articulo.imagen}`" alt="Imagen articulo">
+                            <img class="w-48 h-48 object-cover rounded" :src="articulo.imagenes && articulo.imagenes.length > 0
+              ? `/storage/${articulo.imagenes[0].ruta}`
+              : '/img/placeholder.webp'" alt="Imagen articulo">
                         </div>
                         <div class="row-start-2 row-end-3 col-span-2">
 

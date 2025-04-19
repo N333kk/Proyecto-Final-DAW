@@ -73,12 +73,16 @@ defineProps({
                     <li class="bg-white p-6 rounded-lg shadow-md flex text-black" v-for="articulo in articulos"
                         :key="articulo.id">
                         <div class="flex-shrink-0 p-1">
-                            <img class="w-32 h-32 object-cover rounded" :src="`${articulo.imagen}`"
+                            <img class="w-32 h-32 object-cover rounded" :src="articulo.imagenes && articulo.imagenes.length > 0
+              ? `/storage/${articulo.imagenes[0].ruta}`
+              : '/img/placeholder.webp'"
                                 alt="Imagen Articulo">
                         </div>
                         <div class="ml-4">
                             <h2 class="text-lg font-semibold mb-2">{{ articulo.nombre }}</h2>
-                            <p class="text-black font-bold">{{ articulo.categoria }}</p>
+                            <p class="text-black font-bold">{{ articulo.categoria && articulo.categoria.length > 0
+     ? articulo.categoria[0].nombre
+     : 'Sin categoría' }}</p>
                             <p class="text-black">{{ articulo.descripcion }}</p>
                             <p class="text-black font-semibold">{{ articulo.precio }} €</p>
 
