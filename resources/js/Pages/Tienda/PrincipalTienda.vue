@@ -73,11 +73,15 @@ defineProps({
 
                             <li class="bg-white p-6 rounded-lg shadow-md flex text-black" v-for="articulo in articulos" :key="articulo.id">
                                 <div class="flex-shrink-0 p-1">
-                                    <img class="w-32 h-32 object-cover rounded" :src="`${articulo.imagen}`" alt="Imagen articulo">
+                                    <img class="w-32 h-32 object-cover rounded" :src="articulo.imagenes && articulo.imagenes.length > 0
+              ? `/storage/${articulo.imagenes[0].ruta}`
+              : '/img/placeholder.webp'" alt="Imagen articulo">
                                 </div>
                                 <div class="ml-4">
                                     <h2 class="text-lg font-semibold mb-2">{{ articulo.nombre }}</h2>
-                                    <p class="text-neutral-900 font-bold">{{ articulo.categoria }}</p>
+                                    <p class="text-neutral-900 font-bold">{{ articulo.categoria && articulo.categoria.length > 0
+     ? articulo.categoria[0].nombre
+     : 'Sin categoría' }}</p>
                                     <p class="text-neutral-900 font-semibold">{{ articulo.precio }} €</p>
                                     <Link :href="`/articulos/${articulo.id}`" class="bg-gradient-to-r from-onyx-100 to-onyx-400 hover:from-onyx-400 hover:to-onyx-600  hover:text-onyx-100 transition-all text-white font-bold py-2 px-4 rounded mt-2 mx-1 inline-block">Mostrar Articulo</Link>
                                     <Link v-if="$page.props.auth.user" :href="`/cart/${articulo.id}`" method="POST" class="bg-gradient-to-r from-onyx-100 to-onyx-400 hover:from-onyx-400 hover:to-onyx-600  hover:text-onyx-100 text-white font-bold py-2 px-4 rounded mt-2 mx-1 inline-block" @click="addToCart(articulo.id)">Añadir al Carrito</Link>

@@ -93,7 +93,9 @@ const precioTotal = computed(() => {
                         v-for="item in cartItems" :key="item.id">
 
                         <div class="flex-shrink-0 p-1 flex flex-col items-center justify-center ml-2">
-                            <img class="w-12 h-12 object-cover rounded-full" :src="`${item.articulo.imagen}`"
+                            <img class="w-12 h-12 object-cover rounded-full" :src="articulo.imagenes && articulo.imagenes.length > 0
+              ? `/storage/${articulo.imagenes[0].ruta}`
+              : '/img/placeholder.webp'"
                                 alt="Imagen Articulo">
 
                         </div>
