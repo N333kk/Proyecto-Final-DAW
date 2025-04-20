@@ -50,8 +50,8 @@ Route::middleware([
     Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
     Route::get('cart/checkout/success', [CartController::class, 'checkoutSuccess'])->name('cart.checkout.success');
     Route::get('cart/checkout/cancel', [CartController::class, 'checkoutCancel'])->name('cart.checkout.cancel');
-    Route::post('/cart/{id}', [CartController::class, 'store']);
-    Route::put('/cart/{id}', [CartController::class, 'update']);
+    Route::post('/cart/{id}', [CartController::class, 'store'])->name('cart.store');
+    Route::put('/cart/{id}', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/cart/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
 
 });
