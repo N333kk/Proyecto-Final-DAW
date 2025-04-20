@@ -55,30 +55,40 @@ defineProps({
                     </nav>
                 </header>
 
-                <main class="mt-6 ">
-                    <div class="bg-stone-300 p-8 mx-64 grid grid-cols-2 gap-2 grid-rows-3 rounded-xl text-zinc-950">
-                        <div>
-            <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
-                <div v-if="$page.props.jetstream.canUpdateProfileInformation">
-                    <UpdateProfileInformationForm :user=user />
+                <main class="mt-6 w-full px-0 max-w-none">
+                    <div class="bg-white dark:bg-black shadow-xl text-gray-800 dark:text-white/90">
+                        <div class="p-6 max-w-7xl mx-auto">
+                            <h2 class="text-xl font-bold">Mi Perfil</h2>
+                            <p class="mt-1 text-sm mb-6">Administra tu información y preferencias de cuenta</p>
 
-                    <SectionBorder />
-                </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                                <!-- Sección de información de perfil - Columnas 1-3 -->
+                                <div class="lg:col-span-3">
+                                    <div v-if="$page.props.jetstream.canUpdateProfileInformation">
+                                        <UpdateProfileInformationForm :user="user" />
+                                        <SectionBorder />
+                                    </div>
 
-                <div v-if="$page.props.jetstream.canUpdatePassword">
-                    <UpdatePasswordForm class="mt-10 sm:mt-0" />
+                                    <div v-if="$page.props.jetstream.canUpdatePassword">
+                                        <UpdatePasswordForm class="mt-10 sm:mt-0" />
+                                        <SectionBorder />
+                                    </div>
 
-                    <SectionBorder />
-                </div>
+                                    <template v-if="$page.props.jetstream.hasAccountDeletionFeatures">
+                                        <DeleteUserForm class="mt-10 sm:mt-0" />
+                                    </template>
+                                </div>
 
-                <template v-if="$page.props.jetstream.hasAccountDeletionFeatures">
-                    <SectionBorder />
-
-                    <DeleteUserForm class="mt-10 sm:mt-0" />
-                </template>
-            </div>
-        </div>
-
+                                <!-- Sección para artículos favoritos - Columnas 4-5 -->
+                                <div class="lg:col-span-2 bg-white dark:bg-black border border-white/15 rounded-xl p-6">
+                                    <h3 class="text-lg font-semibold mb-4">Mis Artículos Favoritos</h3>
+                                    <div class="min-h-[400px] flex items-center justify-center text-gray-500 dark:text-gray-400">
+                                        <!-- Aquí se implementará la lista de artículos favoritos -->
+                                        <p class="text-sm">Próximamente tus artículos favoritos</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </main>
 
