@@ -6,47 +6,68 @@ const props = defineProps({
     articulo: Object,
 });
 
-const imagenActual = props.articulo.imagenes && props.articulo.imagenes.length > 0
-    ? props.articulo.imagenes[0].ruta
-    : null;
+// Almacenamos todas las imágenes actuales
+const imagenesActuales = ref(props.articulo.imagenes || []);
+
+// Almacenamos las nuevas imágenes que se van a subir
+const nuevasImagenes = ref([]);
+
+// Almacenamos los IDs de las imágenes a eliminar
+const imagenesAEliminar = ref([]);
 
 const form = useForm({
     nombre: props.articulo.nombre,
     categoria_id: props.articulo.categoria_id || '1',
     descripcion: props.articulo.descripcion,
     precio: props.articulo.precio,
-    imagen: null,
+    nuevas_imagenes: [],
+    imagenes_a_eliminar: [],
     _method: 'put',
 });
 
-const previewImage = ref(imagenActual ? `/storage/${imagenActual}` : null);
-const nuevaImagen = ref(null);
+// Función para manejar la subida de nuevas imágenes
+const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
 
-const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    // Crear previews para las nuevas imágenes y agregarlas al array
+    files.forEach(file => {
+        const previewUrl = URL.createObjectURL(file);
+        nuevasImagenes.value.push({
+            file: file,
+            preview: previewUrl
+        });
+    });
 
-    nuevaImagen.value = file;
-    form.imagen = file;
-    previewImage.value = URL.createObjectURL(file);
+    // Actualizar el formulario con las nuevas imágenes
+    form.nuevas_imagenes = nuevasImagenes.value.map(img => img.file);
 };
 
-const submitForm = () => {o
-    if (nuevaImagen.value) {
-        form.imagen = nuevaImagen.value;
-    } else if (imagenActual) {
-        form.imagen = imagenActual;
-    } else {
-        form.imagen = 'error';
-    }
+// Función para eliminar una imagen existente
+const marcarImagenParaEliminar = (imagen) => {
+    imagenesAEliminar.value.push(imagen.id);
+    imagenesActuales.value = imagenesActuales.value.filter(img => img.id !== imagen.id);
+    form.imagenes_a_eliminar = imagenesAEliminar.value;
+};
 
+// Función para quitar una imagen nueva antes de subir
+const quitarNuevaImagen = (index) => {
+    // Liberar el objeto URL para evitar fugas de memoria
+    URL.revokeObjectURL(nuevasImagenes.value[index].preview);
+    nuevasImagenes.value.splice(index, 1);
+    form.nuevas_imagenes = nuevasImagenes.value.map(img => img.file);
+};
+
+const submitForm = () => {
     form.post(`/articulos/${props.articulo.id}`, {
-        // Solo usamos forceFormData si hay una nueva imagen
-        forceFormData: !!nuevaImagen.value,
+        // Usar forceFormData si hay imágenes nuevas
+        forceFormData: true,
         onSuccess: () => {
-            if (previewImage.value && previewImage.value.startsWith('blob:')) {
-                URL.revokeObjectURL(previewImage.value);
-            }
+            // Limpiar previews de URL para evitar fugas de memoria
+            nuevasImagenes.value.forEach(img => {
+                URL.revokeObjectURL(img.preview);
+            });
+            nuevasImagenes.value = [];
         }
     });
 };
@@ -96,19 +117,50 @@ const submitForm = () => {o
             </div>
 
             <div class="mb-4">
-                <label class="block text-white text-sm font-bold mb-2" for="imagen">Imagen</label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    type="file" @change="handleImageChange" accept="image/*" @input="form.imagen" id="imagen"/>
+                    <label class="block text-white text-sm font-bold mb-2">Imágenes actuales</label>
 
-                <!-- Vista previa de la imagen actual o nueva -->
-                <div v-if="previewImage" class="mt-2">
-                    <img :src="previewImage" alt="Vista previa" class="max-h-40 rounded">
+                    <!-- Mostrar mensaje si no hay imágenes -->
+                    <div v-if="imagenesActuales.length === 0" class="text-gray-300 italic">
+                        No hay imágenes asociadas a este artículo
+                    </div>
+
+                    <!-- Galería de imágenes actuales -->
+                    <div v-else class="grid grid-cols-2 gap-4 mb-4">
+                        <div v-for="imagen in imagenesActuales" :key="imagen.id" class="relative">
+                            <img :src="`/storage/${imagen.ruta}`" class="h-40 w-full object-cover rounded" alt="Imagen del artículo">
+                            <button type="button" @click="marcarImagenParaEliminar(imagen)"
+                                class="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <label class="block text-white text-sm font-bold mb-2">Nuevas imágenes</label>
+
+                    <!-- Imágenes nuevas seleccionadas -->
+                    <div v-if="nuevasImagenes.length > 0" class="grid grid-cols-2 gap-4 mb-4">
+                        <div v-for="(imagen, index) in nuevasImagenes" :key="index" class="relative">
+                            <img :src="imagen.preview" class="h-40 w-full object-cover rounded" alt="Nueva imagen">
+                            <button type="button" @click="quitarNuevaImagen(index)"
+                                class="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Input para subir nuevas imágenes -->
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        type="file" @change="handleImageUpload" accept="image/*" multiple id="imagen"/>
+
+                    <div v-if="form.errors.nuevas_imagenes" class="text-red-500 text-xs italic mt-4">
+                        {{ form.errors.nuevas_imagenes }}
+                    </div>
                 </div>
 
-                <div v-if="form.errors.imagen" class="text-red-500 text-xs italic mt-4">
-                    {{ form.errors.imagen }}
-                </div>
-            </div>
 
             <div class="mb-4">
                 <label class="block text-white text-sm font-bold mb-2" for="precio">Precio</label>

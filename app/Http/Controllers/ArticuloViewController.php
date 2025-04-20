@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Articulo;
+use App\Models\Imagen;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
@@ -66,7 +68,7 @@ class ArticuloViewController extends Controller
     public function edit(Articulo $articulo)
     {
         return Inertia::render('Admin/EditarArticulo', [
-            'articulo' => $articulo
+            'articulo' => $articulo->load(['imagenes'])
         ]);
     }
 
@@ -75,36 +77,52 @@ class ArticuloViewController extends Controller
      */
     public function update(Request $request, Articulo $articulo)
     {
-        $rules = [
+        // Validación
+        $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'required|string',
             'precio' => 'required|numeric',
             'categoria_id' => 'required|exists:categorias,id',
-            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
-        ];
+            'nuevas_imagenes.*' => 'nullable|image|max:2048',
+            'imagenes_a_eliminar' => 'nullable|array',
+            'imagenes_a_eliminar.*' => 'exists:imagenes,id',
+        ]);
 
-        $request->validate($rules);
+        // Actualizar datos básicos del artículo
+        $articulo->update([
+            'nombre' => $validated['nombre'],
+            'descripcion' => $validated['descripcion'],
+            'precio' => $validated['precio'],
+            'categoria_id' => $validated['categoria_id'],
+        ]);
 
-        $articulo->nombre = $request->nombre;
-        $articulo->descripcion = $request->descripcion;
-        $articulo->precio = $request->precio;
-
-        if ($request->categoria_id) {
-            $articulo->categoria()->sync([$request->categoria_id]);
+        // Eliminar imágenes marcadas para eliminar
+        if (isset($validated['imagenes_a_eliminar']) && count($validated['imagenes_a_eliminar']) > 0) {
+            foreach ($validated['imagenes_a_eliminar'] as $imagenId) {
+                $imagen = Imagen::find($imagenId);
+                if ($imagen && $imagen->articulo_id === $articulo->id) {
+                    // Eliminar archivo físico
+                    Storage::disk('public')->delete($imagen->ruta);
+                    // Eliminar registro
+                    $imagen->delete();
+                }
+            }
         }
 
-        $articulo->save();
+        // Guardar nuevas imágenes
+        if ($request->hasFile('nuevas_imagenes')) {
+            foreach ($request->file('nuevas_imagenes') as $file) {
+                $path = $file->store('articulos', 'public');
 
-        if ($request->hasFile('imagen')) {
-            $path = $request->file('imagen')->store('articulos', 'public');
-            $articulo->imagenes()->create(['ruta' => $path, 'articulo_id' => $articulo->id]);
+                // Crear nuevo registro de imagen
+                Imagen::create([
+                    'articulo_id' => $articulo->id,
+                    'ruta' => $path,
+                ]);
+            }
         }
 
-        if ($request->wantsJson()) {
-            return response()->json(['message' => 'Artículo actualizado']);
-        }
-
-        return redirect()->back()->with('success', 'Artículo actualizado correctamente');
+        return redirect()->route('articulos.index');
     }
 
     /**
