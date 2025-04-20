@@ -21,7 +21,7 @@ class ImagenController extends Controller
 
 
         if ($request->hasFile('imagen')) {
-            $path = $request->file('imagen')->store('articulos', 'public');
+            $path = $request->file('imagen')->store('articulos', 'gcs');
         } else {
             $path = null;
         }
@@ -36,7 +36,7 @@ class ImagenController extends Controller
 {
     $imagen = Imagen::findOrFail($id);
 
-    Storage::disk('public')->delete($imagen->ruta);
+    Storage::disk('gcs')->delete($imagen->ruta);
 
     $imagen->delete();
 

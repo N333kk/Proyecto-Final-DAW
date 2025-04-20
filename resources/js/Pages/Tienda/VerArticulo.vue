@@ -100,7 +100,7 @@ const responsiveOptions = ref([
                             :numVisible="5"
                             :circular="true"
                             :showItemNavigators="true"
-                            :showThumbnails="true"
+                            :showIndicators="true"
                             containerClass="w-full  md:!border-2 md:!border-white/10 sm:!border-black !border-black !rounded-lg p-4"
                             class="custom-galleria"
                         >
@@ -129,8 +129,8 @@ const responsiveOptions = ref([
                             </h1>
                             <p class="text-sm text-white/70 dark:text-white/50 font-medium mt-2">
                                 {{ articulo.categoria && articulo.categoria.length > 0
-                                    ? articulo.categoria[0].nombre
-                                    : 'Sin categoría' }}
+     ? articulo.categoria[0].nombre
+     : 'Sin categoría' }}
                             </p>
                         </div>
 

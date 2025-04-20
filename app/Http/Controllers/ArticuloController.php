@@ -43,7 +43,7 @@ class ArticuloController extends Controller
         }
 
         if ($request->hasFile('imagen')) {
-            $path = $request->file('imagen')->store('articulos', 'public');
+            $path = $request->file('imagen')->store('articulos', 'gcs');
             $articulo->imagenes()->create(['ruta' => $path]);
         }
 
@@ -97,7 +97,7 @@ class ArticuloController extends Controller
         $articulo->save();
 
         if ($request->hasFile('imagen')) {
-            $path = $request->file('imagen')->store('articulos', 'public');
+            $path = $request->file('imagen')->store('articulos', 'gcs');
             $articulo->imagenes()->create(['ruta' => $path, 'articulo_id' => $articulo->id]);
         }
 

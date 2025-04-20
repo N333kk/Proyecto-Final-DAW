@@ -68,7 +68,7 @@ class ArticuloViewController extends Controller
     public function edit(Articulo $articulo)
     {
         return Inertia::render('Admin/EditarArticulo', [
-            'articulo' => $articulo->load(['imagenes'])
+            'articulo' => $articulo->load(['imagenes', 'categoria'])
         ]);
     }
 
@@ -96,13 +96,17 @@ class ArticuloViewController extends Controller
             'categoria_id' => $validated['categoria_id'],
         ]);
 
+        if ($request->categoria_id) {
+            $articulo->categoria()->sync([$request->categoria_id]);
+        }
+
         // Eliminar imágenes marcadas para eliminar
         if (isset($validated['imagenes_a_eliminar']) && count($validated['imagenes_a_eliminar']) > 0) {
             foreach ($validated['imagenes_a_eliminar'] as $imagenId) {
                 $imagen = Imagen::find($imagenId);
                 if ($imagen && $imagen->articulo_id === $articulo->id) {
                     // Eliminar archivo físico
-                    Storage::disk('public')->delete($imagen->ruta);
+                    Storage::disk('gcs')->delete($imagen->ruta);
                     // Eliminar registro
                     $imagen->delete();
                 }
@@ -112,7 +116,7 @@ class ArticuloViewController extends Controller
         // Guardar nuevas imágenes
         if ($request->hasFile('nuevas_imagenes')) {
             foreach ($request->file('nuevas_imagenes') as $file) {
-                $path = $file->store('articulos', 'public');
+                $path = $file->store('articulos', 'gcs');
 
                 // Crear nuevo registro de imagen
                 Imagen::create([
