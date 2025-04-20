@@ -10,6 +10,10 @@ defineProps({
     articulos: Object,
 });
 
+const isFullUrl = (url) => {
+    return url && (url.startsWith('http://') || url.startsWith('https://'));
+};
+
 </script>
 
 <template>
@@ -74,7 +78,7 @@ defineProps({
                         :key="articulo.id">
                         <div class="flex-shrink-0 p-1">
                             <img class="w-32 h-32 object-cover rounded" :src="articulo.imagenes && articulo.imagenes.length > 0
-              ? `/storage/${articulo.imagenes[0].ruta}`
+              ? (isFullUrl(articulo.imagenes[0].ruta) ? articulo.imagenes[0].ruta : `/${articulo.imagenes[0].ruta}`)
               : '/img/placeholder.webp'"
                                 alt="Imagen Articulo">
                         </div>

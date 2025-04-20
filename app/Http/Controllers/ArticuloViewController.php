@@ -34,16 +34,36 @@ class ArticuloViewController extends Controller
      */
     public function store(Request $request)
     {
-        Articulo::create([
-            ...$request->all(),
-            ...$request->validate([
-                'nombre' => ['required', 'string'],
-                'imagen' => ['required', 'image', 'mimes:jpeg,png,jpg,gif|max:2048'],
-                'categoria_id' => ['required', 'string'],
-                'descripcion' => ['required', 'string'],
-                'precio' => ['required', 'min:0', 'max:9999.99', 'numeric']
-            ])
+        $validated = $request->validate([
+            'nombre' => ['required', 'string'],
+            'imagen' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'categoria_id' => ['required', 'string'],
+            'descripcion' => ['required', 'string'],
+            'precio' => ['required', 'min:0', 'max:9999.99', 'numeric']
         ]);
+
+        $articulo = Articulo::create([
+            'nombre' => $validated['nombre'],
+            'descripcion' => $validated['descripcion'],
+            'precio' => $validated['precio'],
+            'categoria_id' => $validated['categoria_id'],
+        ]);
+
+        if ($request->categoria_id) {
+            $articulo->categoria()->sync([$request->categoria_id]);
+        }
+
+        if ($request->hasFile('imagen')) {
+            $disk = Storage::disk('gcs');
+            $path = $disk->putFile('articulos', $request->file('imagen'));
+
+            $url = $disk->url($path);
+
+            Imagen::create([
+                'articulo_id' => $articulo->id,
+                'ruta' => $url,
+            ]);
+        }
 
         return redirect()->route('articulos.index');
     }
@@ -87,7 +107,7 @@ class ArticuloViewController extends Controller
             'imagenes_a_eliminar' => 'nullable|array',
             'imagenes_a_eliminar.*' => 'exists:imagenes,id',
         ]);
-
+        $disk = Storage::disk('gcs');
         // Actualizar datos básicos del artículo
         $articulo->update([
             'nombre' => $validated['nombre'],
@@ -106,7 +126,7 @@ class ArticuloViewController extends Controller
                 $imagen = Imagen::find($imagenId);
                 if ($imagen && $imagen->articulo_id === $articulo->id) {
                     // Eliminar archivo físico
-                    Storage::disk('gcs')->delete($imagen->ruta);
+                    $disk->delete($imagen->ruta);
                     // Eliminar registro
                     $imagen->delete();
                 }
@@ -116,12 +136,15 @@ class ArticuloViewController extends Controller
         // Guardar nuevas imágenes
         if ($request->hasFile('nuevas_imagenes')) {
             foreach ($request->file('nuevas_imagenes') as $file) {
-                $path = $file->store('articulos', 'gcs');
+                $path = $disk->putFile('articulos', $file);
 
-                // Crear nuevo registro de imagen
+                // Generar la URL pública del archivo
+                $url = $disk->url($path);
+
+                // Crear nuevo registro de imagen con la URL completa
                 Imagen::create([
                     'articulo_id' => $articulo->id,
-                    'ruta' => $path,
+                    'ruta' => $url,
                 ]);
             }
         }

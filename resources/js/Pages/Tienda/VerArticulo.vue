@@ -12,15 +12,17 @@ const props = defineProps({
     articulo: Object,
 });
 
-// Preparar las imágenes para la galería
+const isFullUrl = (url) => {
+    return url && (url.startsWith('http://') || url.startsWith('https://'));
+};
+
 const imagenes = computed(() => {
     if (props.articulo.imagenes && props.articulo.imagenes.length > 0) {
         return props.articulo.imagenes.map(img => ({
-            src: `/storage/${img.ruta}`,
+            src: isFullUrl(img.ruta) ? img.ruta : `/storage/${img.ruta}`,
             alt: `Imagen de ${props.articulo.nombre}`
         }));
     } else {
-        // Si no hay imágenes, mostrar una imagen de placeholder
         return [{
             src: '/img/placeholder.webp',
             alt: 'Imagen no disponible'
@@ -28,7 +30,6 @@ const imagenes = computed(() => {
     }
 });
 
-// Opciones para Galleria
 const responsiveOptions = ref([
     {
         breakpoint: '1024px',
