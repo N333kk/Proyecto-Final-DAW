@@ -6,6 +6,11 @@ const logout = () => {
     router.post(route('logout'));
 };
 
+// Función para determinar si la URL es completa (comienza con http:// o https://)
+const isFullUrl = (url) => {
+    return url && (url.startsWith('http://') || url.startsWith('https://'));
+};
+
 const checkout = async () => {
     console.log('Iniciando checkout con axios...');
     try {
@@ -156,10 +161,12 @@ const precioTotal = computed(() => {
                     <div class="bg-white py-2 px-8 rounded-2xl shadow-md flex text-black m-4 transition-all hover:bg-white/90"
                         v-for="item in localCartItems" :key="item.id">
 
-                        <div class="flex-shrink-0  flex flex-col items-center justify-center ml-2">
+                        <div class="flex-shrink-0 flex flex-col items-center justify-center ml-2">
                             <img class="w-12 h-12 object-cover rounded-full"
                                 :src="item.articulo.imagenes && item.articulo.imagenes.length > 0
-                                    ? `/storage/${item.articulo.imagenes[0].ruta}`
+                                    ? (isFullUrl(item.articulo.imagenes[0].ruta)
+                                        ? item.articulo.imagenes[0].ruta
+                                        : `/storage/${item.articulo.imagenes[0].ruta}`)
                                     : '/img/placeholder.webp'"
                                 alt="Imagen Articulo">
                         </div>

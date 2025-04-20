@@ -73,12 +73,21 @@ class ArticuloViewController extends Controller
      */
     public function show(Articulo $articulo)
     {
-
         $articulo->load('imagenes');
         $articulo->load('categoria');
 
+        $esFavorito = false;
+
+        // Comprobar si el artículo está en favoritos del usuario actual
+        if (auth()->check()) {
+            $esFavorito = auth()->user()->articulos_favoritos()
+                ->where('articulo_id', $articulo->id)
+                ->exists();
+        }
+
         return Inertia::render('Tienda/VerArticulo', [
-            'articulo' => $articulo
+            'articulo' => $articulo,
+            'esFavorito' => $esFavorito
         ]);
     }
 

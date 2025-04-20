@@ -1,7 +1,8 @@
 <script setup>
-
 import { Link, router } from '@inertiajs/vue3'
 import Galleria from 'primevue/galleria';
+import 'vue3-carousel/dist/carousel.css';
+import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel';
 import { ref, computed } from 'vue';
 
 const logout = () => {
@@ -10,7 +11,14 @@ const logout = () => {
 
 const props = defineProps({
     articulo: Object,
+    esFavorito: {
+        type: Boolean,
+        default: false
+    }
 });
+
+// Usamos la prop esFavorito que viene del backend
+const esFavorito = ref(props.esFavorito);
 
 const isFullUrl = (url) => {
     return url && (url.startsWith('http://') || url.startsWith('https://'));
@@ -95,31 +103,35 @@ const responsiveOptions = ref([
             <main class="w-full p-4 mt-6 ">
                 <div class="flex flex-col md:flex-row gap-8">
                     <div class="w-full md:w-4/5">
-                        <Galleria
-                            :value="imagenes"
-                            :responsiveOptions="responsiveOptions"
-                            :numVisible="5"
-                            :circular="true"
-                            :showItemNavigators="true"
-                            :showIndicators="true"
-                            containerClass="w-full  md:!border-2 md:!border-white/10 sm:!border-black !border-black !rounded-lg p-4"
-                            class="custom-galleria"
+                        <Carousel
+                            class="w-full md:border-2 md:border-white/10 sm:border-black border-black rounded-lg p-4"
+                            ref="carousel"
+                            :items-to-show="1"
+                            :wrap-around="true"
                         >
-                            <template #item="slotProps">
+                            <Slide v-for="(imagen, index) in imagenes" :key="index">
                                 <img
-                                    :src="slotProps.item.src"
-                                    :alt="slotProps.item.alt"
+                                    :src="imagen.src"
+                                    :alt="imagen.alt"
                                     class="w-full h-[500px] object-contain"
                                 />
+                            </Slide>
+                            <template #addons>
+                                <Navigation />
+                                <Pagination />
                             </template>
-                            <template #thumbnail="slotProps">
-                                <img
-                                    :src="slotProps.item.src"
-                                    :alt="slotProps.item.alt"
-                                    class="w-16 h-16 object-cover cursor-pointer"
-                                />
-                            </template>
-                        </Galleria>
+                        </Carousel>
+
+                        <div class="flex mt-4 overflow-x-auto space-x-2 p-2">
+                            <img
+                                v-for="(imagen, index) in imagenes"
+                                :key="index"
+                                :src="imagen.src"
+                                :alt="imagen.alt"
+                                class="w-16 h-16 object-cover cursor-pointer rounded"
+                                @click="$refs.carousel.slideTo(index)"
+                            />
+                        </div>
                     </div>
 
                     <div class="w-full md:w-1/5 flex flex-col">
@@ -149,15 +161,32 @@ const responsiveOptions = ref([
                                 {{ articulo.precio }} €
                             </p>
 
-                            <Link
-    :href="route('cart.store', { id: articulo.id })"
-    method="post"
-    as="button"
-    type="button"
-    class="w-full bg-white text-black font-semibold py-3 px-4 rounded-lg hover:bg-white/90 transition"
->
-    Añadir al carrito
-</Link>
+                            <div class="flex space-x-2">
+                                <Link
+                                    :href="route('cart.store', { id: articulo.id })"
+                                    method="post"
+                                    as="button"
+                                    type="button"
+                                    class="flex-1 bg-white text-black font-semibold py-3 px-4 rounded-lg hover:bg-white/90 transition"
+                                >
+                                    Añadir al carrito
+                                </Link>
+
+                                <Link
+                                    v-if="$page.props.auth.user"
+                                    :href="route('favoritos.toggle', { id: articulo.id })"
+                                    method="post"
+                                    as="button"
+                                    type="button"
+                                    class="bg-white/20 text-white font-semibold py-3 px-4 rounded-lg hover:bg-white/30 transition"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" :fill="esFavorito ? 'currentColor' : 'none'"
+                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>

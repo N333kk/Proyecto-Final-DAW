@@ -127,7 +127,8 @@ const submitForm = () => {
                     <!-- Galería de imágenes actuales -->
                     <div v-else class="grid grid-cols-2 gap-4 mb-4">
                         <div v-for="imagen in imagenesActuales" :key="imagen.id" class="relative">
-                            <img :src="`/storage/${imagen.ruta}`" class="h-40 w-full object-cover rounded" alt="Imagen del artículo">
+                            <img :src="imagen.ruta && imagen.ruta.startsWith('http') ? imagen.ruta : `/storage/${imagen.ruta}`"
+                                class="h-40 w-full object-cover rounded" alt="Imagen del artículo">
                             <button type="button" @click="marcarImagenParaEliminar(imagen)"
                                 class="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

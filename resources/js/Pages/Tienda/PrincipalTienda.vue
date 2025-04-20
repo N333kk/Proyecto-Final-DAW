@@ -6,14 +6,17 @@ const logout = () => {
     router.post(route('logout'));
 };
 
+// Función para determinar si la URL es completa (comienza con http:// o https://)
+const isFullUrl = (url) => {
+    return url && (url.startsWith('http://') || url.startsWith('https://'));
+};
+
 defineProps({
     articulos: Object,
     addToCart(articuloId) {
         this.$inertia.post('/cart', { articulo_id: articuloId, cantidad: 1 });
     }
 });
-
-
 
 </script>
 
@@ -73,9 +76,13 @@ defineProps({
 
                             <li class="bg-white p-6 rounded-lg shadow-md flex text-black" v-for="articulo in articulos" :key="articulo.id">
                                 <div class="flex-shrink-0 p-1">
-                                    <img class="w-32 h-32 object-cover rounded" :src="articulo.imagenes && articulo.imagenes.length > 0
-              ? `/storage/${articulo.imagenes[0].ruta}`
-              : '/img/placeholder.webp'" alt="Imagen articulo">
+                                    <img class="w-32 h-32 object-cover rounded" 
+                                        :src="articulo.imagenes && articulo.imagenes.length > 0
+                                            ? (isFullUrl(articulo.imagenes[0].ruta) 
+                                                ? articulo.imagenes[0].ruta 
+                                                : `/storage/${articulo.imagenes[0].ruta}`)
+                                            : '/img/placeholder.webp'" 
+                                        alt="Imagen articulo">
                                 </div>
                                 <div class="ml-4">
                                     <h2 class="text-lg font-semibold mb-2">{{ articulo.nombre }}</h2>

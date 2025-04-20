@@ -8,6 +8,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\PerfilViewController;
 use App\Http\Controllers\NoAuthController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\ArticuloFavoritoController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 
@@ -31,7 +32,7 @@ Route::resource('/perfil', PerfilViewController::class);
 
 Route::get('/no-auth', [NoAuthController::class, 'index'])->name('no-auth');
 
-Route::get('/tienda', function(){
+Route::get('/tienda', function () {
     $controller = new TiendaViewController();
     return $controller->index();
 })->name('tienda');
@@ -54,4 +55,7 @@ Route::middleware([
     Route::put('/cart/{id}', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/cart/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
 
+    // Rutas para favoritos
+    Route::post('/favoritos/{id}', [ArticuloFavoritoController::class, 'toggleFavorito'])->name('favoritos.toggle');
+    Route::get('/favoritos', [ArticuloFavoritoController::class, 'index'])->name('favoritos.index');
 });
