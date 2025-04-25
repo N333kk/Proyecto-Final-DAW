@@ -20,6 +20,7 @@ class ArticuloFavoritoController extends Controller
         $articulo = Articulo::findOrFail($id);
         $user = Auth::user();
 
+        // Buscar si existe el registro
         $favorito = ArticuloFavorito::where('user_id', $user->id)
             ->where('articulo_id', $articulo->id)
             ->first();

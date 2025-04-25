@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Articulo;
 use App\Models\Imagen;
+use App\Models\Categoria;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -13,11 +14,51 @@ class ArticuloViewController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $categoriaId = $request->query('categoria');
+
+        $query = Articulo::with(['imagenes', 'categoria']);
+
+        if ($categoriaId) {
+            // Obtener la categoría seleccionada
+            $categoriaSeleccionada = Categoria::find($categoriaId);
+
+            if ($categoriaSeleccionada) {
+                // Comprobar si la categoría tiene subcategorías
+                $subcategoriasIds = $categoriaSeleccionada->subcategorias()->pluck('id')->toArray();
+
+                if (count($subcategoriasIds) > 0) {
+                    // Si tiene subcategorías, incluir artículos tanto de la categoría principal como de sus subcategorías
+                    $idsABuscar = array_merge([$categoriaId], $subcategoriasIds);
+                    $query->whereHas('categoria', function ($q) use ($idsABuscar) {
+                        $q->whereIn('categorias.id', $idsABuscar);
+                    });
+                } else {
+                    // Si no tiene subcategorías, solo buscar por la categoría seleccionada
+                    $query->whereHas('categoria', function ($q) use ($categoriaId) {
+                        $q->where('categorias.id', $categoriaId);
+                    });
+                }
+            }
+        }
+
+        $articulos = $query->get();
+
+        // Obtener todas las categorías para el menú desplegable
+        $categorias = Categoria::with('subcategorias')->whereNull('categoria_padre_id')->get();
+
+        // Obtener IDs de artículos favoritos del usuario actual
+        $articulosFavoritos = [];
+        if (auth()->check()) {
+            $articulosFavoritos = auth()->user()->articulos_favoritos()->pluck('articulo_id')->toArray();
+        }
 
         return Inertia::render('Admin/ListadoArticulos', [
-            'articulos' => Articulo::with(['imagenes', 'categoria'])->get()
+            'articulos' => $articulos,
+            'categorias' => $categorias,
+            'categoriaSeleccionada' => $categoriaId,
+            'articulosFavoritos' => $articulosFavoritos
         ]);
     }
 

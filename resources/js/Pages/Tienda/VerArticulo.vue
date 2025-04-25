@@ -1,6 +1,5 @@
 <script setup>
 import { Link, router } from '@inertiajs/vue3'
-import Galleria from 'primevue/galleria';
 import 'vue3-carousel/dist/carousel.css';
 import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel';
 import { ref, computed } from 'vue';
@@ -17,8 +16,25 @@ const props = defineProps({
     }
 });
 
-// Usamos la prop esFavorito que viene del backend
-const esFavorito = ref(props.esFavorito);
+// Usamos un ref para poder cambiar su estado reactivamente cuando el usuario hace clic
+const esFavoritoActual = ref(props.esFavorito);
+
+const toggleFavorito = () => {
+    // Actualización optimista: cambiamos el estado visual inmediatamente
+    esFavoritoActual.value = !esFavoritoActual.value;
+
+    // Guardamos el estado anterior por si hay errores
+    const estadoAnterior = esFavoritoActual.value;
+
+    // Enviamos la petición al servidor
+    router.post(route('favoritos.toggle', { id: props.articulo.id }), {}, {
+        preserveScroll: true,
+        onError: () => {
+            // En caso de error, revertimos el cambio
+            esFavoritoActual.value = !estadoAnterior;
+        }
+    });
+};
 
 const isFullUrl = (url) => {
     return url && (url.startsWith('http://') || url.startsWith('https://'));
@@ -63,7 +79,7 @@ const responsiveOptions = ref([
                     class="flex min-w-screen space-x-4 sm:justify-between justify-center p-6 bg-black text-white dark:text-white/80 border-b border-white/20">
                     <!-- Navegación sin cambios -->
                     <div class="space-x-4">
-                        <Link href="/tienda" class="text-sm font-medium hover:text-black dark:hover:text-white/50">
+                        <Link href="/" class="text-sm font-medium hover:text-black dark:hover:text-white/50">
                         Inicio</Link>
                         <Link href="/articulos" class="text-sm font-medium hover:text-black dark:hover:text-white/50">
                         Articulos</Link>
@@ -174,13 +190,11 @@ const responsiveOptions = ref([
 
                                 <Link
                                     v-if="$page.props.auth.user"
-                                    :href="route('favoritos.toggle', { id: articulo.id })"
-                                    method="post"
-                                    as="button"
-                                    type="button"
+                                    href="#"
+                                    @click.prevent="toggleFavorito"
                                     class="bg-white/20 text-white font-semibold py-3 px-4 rounded-lg hover:bg-white/30 transition"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" :fill="esFavorito ? 'currentColor' : 'none'"
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" :fill="esFavoritoActual ? 'currentColor' : 'none'"
                                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />

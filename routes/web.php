@@ -15,13 +15,9 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+    $controller = new TiendaViewController();
+    return $controller->index();
+})->name('tienda');
 
 
 Route::resource('/articulos', ArticuloViewController::class);
@@ -31,11 +27,6 @@ Route::resource('/pedidos', PedidosViewController::class);
 Route::resource('/perfil', PerfilViewController::class);
 
 Route::get('/no-auth', [NoAuthController::class, 'index'])->name('no-auth');
-
-Route::get('/tienda', function () {
-    $controller = new TiendaViewController();
-    return $controller->index();
-})->name('tienda');
 
 Route::get('/dashboard/{id}/ban', [ClienteController::class, 'ban']);
 

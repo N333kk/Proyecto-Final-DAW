@@ -21,7 +21,7 @@ defineProps({
                 <nav
                     class="flex min-w-screen space-x-4 sm:justify-between justify-center p-6 bg-black text-white dark:text-white/80 border-b border-white/20">
                     <div class="space-x-4">
-                        <Link href="/tienda" class="text-sm font-medium  hover:text-black dark:hover:text-white/50">
+                        <Link href="/" class="text-sm font-medium  hover:text-black dark:hover:text-white/50">
                         Inicio</Link>
                         <Link href="/articulos" class="text-sm font-medium  hover:text-black dark:hover:text-white/50">
                         Articulos</Link>

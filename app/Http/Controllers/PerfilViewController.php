@@ -13,7 +13,9 @@ class PerfilViewController extends Controller{
 
     public function index()
     {
-        $user = Auth::user();
+        $userId = Auth::user();
+        $user = User::find($userId->id)->load('articulos_favoritos.imagenes')
+        ;
         return Inertia::render('Tienda/Perfil', [
             'user' => $user
         ]);

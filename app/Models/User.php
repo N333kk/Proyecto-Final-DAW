@@ -78,8 +78,7 @@ class User extends Authenticatable
 
     public function articulos_favoritos()
     {
-        return $this->belongsToMany(Articulo::class, 'articulos_favoritos', 'user_id', 'articulo_id')
-        ->withTimestamps();
+        return $this->belongsToMany(Articulo::class, 'articulos_favoritos', 'user_id', 'articulo_id');
     }
 
     public function cart()
