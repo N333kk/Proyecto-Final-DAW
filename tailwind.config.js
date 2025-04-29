@@ -16,8 +16,8 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ["Mogra", ...defaultTheme.fontFamily.sans],
-                serif: ["Rubik Spray Paint", ...defaultTheme.fontFamily.serif],
+                sans: ["Lato", ...defaultTheme.fontFamily.sans],
+                serif: ["Oswald", ...defaultTheme.fontFamily.serif],
             },
             colors: {
                 isabelline: {
