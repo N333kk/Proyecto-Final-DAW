@@ -90,61 +90,70 @@ class CartController extends Controller
     }
 
     public function checkout()
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    if (empty($user->direccion_envio)) {
-        // Devolver un error JSON
-        return response()->json(['error' => 'Necesitas añadir una dirección de envío.'], 400);
+        if (empty($user->direccion_envio)) {
+            // Devolver un error JSON
+            return response()->json(['error' => 'Necesitas añadir una dirección de envío.'], 400);
+        }
+
+        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+        $cartItems = CartItem::with(['articulo.imagenes'])->where('cart_id', $cart->id)->get();
+
+        if ($cartItems->isEmpty()) {
+            // Devolver un error JSON
+            return response()->json(['error' => 'El carrito está vacío.'], 400);
+        }
+
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        try {
+            $session = Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => $this->prepareLineItems($cartItems),
+                'mode' => 'payment',
+                'success_url' => route('cart.checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('cart.checkout.cancel'),
+                'customer_email' => $user->email,
+                'metadata' => [
+                    'user_id' => $user->id,
+                    'cart_id' => $cart->id
+                ]
+            ]);
+
+            session(['stripe_session_id' => $session->id]);
+            // *** ¡Importante! Devolver la URL como JSON ***
+            return response()->json(['url' => $session->url]);
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            \Log::error('Stripe API Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Error de Stripe: ' . $e->getMessage()], 500);
+        } catch (\Exception $e) {
+            \Log::error('Checkout Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Error al procesar el pago: ' . $e->getMessage()], 500);
+        }
     }
-
-    $cart = Cart::firstOrCreate(['user_id' => $user->id]);
-    $cartItems = CartItem::with('articulo')->where('cart_id', $cart->id)->get();
-
-    if ($cartItems->isEmpty()) {
-        // Devolver un error JSON
-        return response()->json(['error' => 'El carrito está vacío.'], 400);
-    }
-
-    Stripe::setApiKey(config('services.stripe.secret'));
-
-    try {
-        $session = Session::create([
-            'payment_method_types' => ['card'],
-            'line_items' => $this->prepareLineItems($cartItems),
-            'mode' => 'payment',
-            'success_url' => route('cart.checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => route('cart.checkout.cancel'),
-            'customer_email' => $user->email,
-            'metadata' => [
-                'user_id' => $user->id,
-                'cart_id' => $cart->id
-            ]
-        ]);
-
-        session(['stripe_session_id' => $session->id]);
-        // *** ¡Importante! Devolver la URL como JSON ***
-        return response()->json(['url' => $session->url]);
-
-    } catch (\Stripe\Exception\ApiErrorException $e) {
-        \Log::error('Stripe API Error: ' . $e->getMessage());
-        return response()->json(['error' => 'Error de Stripe: ' . $e->getMessage()], 500);
-    } catch (\Exception $e) {
-        \Log::error('Checkout Error: ' . $e->getMessage());
-        return response()->json(['error' => 'Error al procesar el pago: ' . $e->getMessage()], 500);
-    }
-}
     private function prepareLineItems($cartItems)
     {
         $lineItems = [];
 
         foreach ($cartItems as $item) {
+            // Verificar si el artículo tiene imágenes y crear un array con ellas
+            $images = [];
+            if (!empty($item->articulo->imagenes) && count($item->articulo->imagenes) > 0) {
+                // Usar la URL completa de la imagen
+                $images[] = $item->articulo->imagenes[0]->ruta;
+            } else {
+                // Usar una imagen placeholder si no hay imágenes
+                $images[] = asset('images/placeholder.png');
+            }
+
             $lineItems[] = [
                 'price_data' => [
                     'currency' => 'eur',
                     'product_data' => [
                         'name' => $item->articulo->nombre,
-                        'images' => null,
+                        'images' => $images,
                         'description' => $item->articulo->descripcion,
                     ],
                     'unit_amount' => $item->precio * 100, // Stripe usa céntimos...
@@ -189,7 +198,7 @@ class CartController extends Controller
 
             // Añadir los artículos al pedido
             foreach ($cartItems as $item) {
-                $pedido->articulos()->attach($item->articulo_id, [
+                $pedido->articulo()->attach($item->articulo_id, [
                     'cantidad' => $item->cantidad,
                     'precio' => $item->precio
                 ]);
@@ -198,7 +207,7 @@ class CartController extends Controller
             // Limpiamos el carrito, no usamos la funcion clearCart() para evitar el redirect
             CartItem::where('cart_id', $cart->id)->delete();
 
-            return redirect()->route('pedidos.index')->with('success', 'Pedido realizado con éxito.');
+            return redirect()->route('/pedidos')->with('success', 'Pedido realizado con éxito.');
         } catch (\Exception $e) {
             return redirect()->route('cart.show')->with('error', 'Error al procesar el pago: ' . $e->getMessage());
         }
