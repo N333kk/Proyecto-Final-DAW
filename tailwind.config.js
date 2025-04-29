@@ -16,7 +16,8 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ["Figtree", ...defaultTheme.fontFamily.sans],
+                sans: ["Mogra", ...defaultTheme.fontFamily.sans],
+                serif: ["Rubik Spray Paint", ...defaultTheme.fontFamily.serif],
             },
             colors: {
                 isabelline: {
