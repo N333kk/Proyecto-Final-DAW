@@ -107,8 +107,6 @@ class CartController extends Controller
     }
 
     Stripe::setApiKey(config('services.stripe.secret'));
-    // Puedes quitar el logger si no lo necesitas para depurar
-    // Stripe::setLogger(new \Monolog\Logger('stripe'));
 
     try {
         $session = Session::create([
@@ -125,7 +123,6 @@ class CartController extends Controller
         ]);
 
         session(['stripe_session_id' => $session->id]);
-
         // *** ¡Importante! Devolver la URL como JSON ***
         return response()->json(['url' => $session->url]);
 
