@@ -37,55 +37,6 @@ const toggleFavorito = () => {
     });
 };
 
-// Función para formatear la descripción, incluyendo soporte para
-// párrafos, listas, negritas y otros formatos básicos
-const formatearDescripcion = computed(() => {
-    if (!props.articulo.descripcion) return 'Este producto no tiene descripción.';
-
-    let descripcion = props.articulo.descripcion;
-
-    // Paso 1: Escapar HTML para prevenir inyecciones
-    const escapeHTML = (unsafe) => {
-        return unsafe
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    };
-
-    descripcion = escapeHTML(descripcion);
-
-    // Paso 2: Convertir saltos de línea en párrafos HTML
-    descripcion = descripcion
-        .split('\n\n')
-        .map(p => p.trim())
-        .filter(p => p.length > 0)
-        .map(p => `<p>${p}</p>`)
-        .join('');
-
-    // Paso 3: Convertir saltos de línea simples en <br>
-    descripcion = descripcion.replace(/\n/g, '<br>');
-
-    // Paso 4: Formatear listas (si comienzan con - o *)
-    descripcion = descripcion.replace(/<p>(\s*[-*]\s+.*?)<\/p>/gs, (match, list) => {
-        const items = list.split(/\n(?=\s*[-*]\s+)/g);
-        return '<ul class="list-disc pl-5 my-2">' +
-            items.map(item => `<li>${item.replace(/^\s*[-*]\s+/, '')}</li>`).join('') +
-            '</ul>';
-    });
-
-    // Paso 5: Formato para negritas con ** o __
-    descripcion = descripcion.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    descripcion = descripcion.replace(/__(.*?)__/g, '<strong>$1</strong>');
-
-    // Paso 6: Formato para cursiva con * o _
-    descripcion = descripcion.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    descripcion = descripcion.replace(/_(.*?)_/g, '<em>$1</em>');
-
-    return descripcion;
-});
-
 const isFullUrl = (url) => {
     return url && (url.startsWith('http://') || url.startsWith('https://'));
 };
@@ -119,11 +70,13 @@ const responsiveOptions = ref([
     }
 ]);
 
+// Calculamos el precio con descuento
 const precioConDescuento = computed(() => {
     if (props.articulo.descuento && props.articulo.descuento > 0) {
-        return (props.articulo.precio * (1 - props.articulo.descuento / 100)).toFixed(2);
+        const descuento = props.articulo.precio * (props.articulo.descuento / 100);
+        return (props.articulo.precio - descuento).toFixed(2);
     }
-    return props.articulo.precio.toFixed(2);
+    return null;
 });
 
 </script>
@@ -198,9 +151,9 @@ const precioConDescuento = computed(() => {
                                     </svg>
                                     Descripción del producto
                                 </h2>
-                                <div class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed article-content"
-                                     v-html="formatearDescripcion">
-                                </div>
+                                <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                                    {{ articulo.descripcion || 'Este producto no tiene descripción.' }}
+                                </p>
                             </div>
 
                             <div class="mt-auto">
@@ -371,72 +324,5 @@ const precioConDescuento = computed(() => {
 
 .carousel__slide:hover img {
     transform: scale(1.03);
-}
-
-/* Estilos adicionales para el contenido HTML */
-.article-content h1, .article-content h2, .article-content h3 {
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
-    font-weight: 600;
-}
-
-.article-content h1 {
-    font-size: 1.5rem;
-}
-
-.article-content h2 {
-    font-size: 1.25rem;
-}
-
-.article-content h3 {
-    font-size: 1.125rem;
-}
-
-.article-content p {
-    margin-bottom: 1rem;
-}
-
-.article-content ul, .article-content ol {
-    padding-left: 1.5rem;
-    margin-bottom: 1rem;
-}
-
-.article-content ul {
-    list-style-type: disc;
-}
-
-.article-content ol {
-    list-style-type: decimal;
-}
-
-.article-content a {
-    color: #8b5cf6;
-    text-decoration: underline;
-}
-
-.article-content table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 1rem;
-}
-
-.article-content th, .article-content td {
-    border: 1px solid #e5e7eb;
-    padding: 0.5rem;
-}
-
-.article-content blockquote {
-    border-left: 4px solid #8b5cf6;
-    padding-left: 1rem;
-    font-style: italic;
-    margin-bottom: 1rem;
-}
-
-.dark .article-content a {
-    color: #a78bfa;
-}
-
-.dark .article-content th, .dark .article-content td {
-    border-color: #374151;
 }
 </style>

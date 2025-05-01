@@ -8,14 +8,14 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 
-class PerfilViewController extends Controller{
+class PerfilViewController extends Controller
+{
 
 
     public function index()
     {
         $userId = Auth::user();
-        $user = User::find($userId->id)->load('articulos_favoritos.imagenes')
-        ;
+        $user = User::find($userId->id)->load('articulos_favoritos.imagenes');
         return Inertia::render('Tienda/Perfil', [
             'user' => $user
         ]);
@@ -36,7 +36,7 @@ class PerfilViewController extends Controller{
             ...$request->validate([
                 'name' => ['required', 'string'],
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-                'telefono' => ['required', 'string'],
+                'telefono' => ['required', 'digits:9'],
                 'direccion_envio' => ['required', 'string'],
                 'direccion_facturacion' => ['required', 'string'],
             ])

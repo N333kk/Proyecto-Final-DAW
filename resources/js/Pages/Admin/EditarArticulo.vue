@@ -19,6 +19,7 @@ const form = useForm({
     nombre: props.articulo.nombre,
     categoria_id: props.articulo.categoria_id || '1',
     descripcion: props.articulo.descripcion,
+    descripcion_short: props.articulo.descripcion_short,
     precio: props.articulo.precio,
     nuevas_imagenes: [],
     imagenes_a_eliminar: [],
@@ -110,11 +111,27 @@ const submitForm = () => {
 
             <div class="mb-4">
                 <label class="block text-white text-sm font-bold mb-2" for="descripcion">Descripcion</label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" v-model="form.descripcion" placeholder="Descripcion" id="descripcion"/>
+                <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                       v-model="form.descripcion" placeholder="Descripcion" id="descripcion" rows="6"></textarea>
                 <div v-if="form.errors.descripcion" class="text-red-500 text-xs italic mt-4">
                     {{ form.errors.descripcion }}
                 </div>
+                <div class="text-gray-300 text-xs mt-2">
+                    Puedes usar formatos como **negrita**, *cursiva*, y listas con - o *
+                </div>
             </div>
+
+            <div class="mb-4">
+                    <label class="block text-white text-sm font-bold mb-2" for="descripcion">Descripcion Corta</label>
+                    <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                          v-model="form.descripcion_short" placeholder="Descripcion Corta" id="descripcion_short" rows="6"></textarea>
+                    <div v-if="form.errors.descripcion_short" class="text-red-500 text-xs italic mt-4">
+                        {{ form.errors.descripcion_short }}
+                    </div>
+                    <div class="text-gray-300 text-xs mt-2">
+                        Esta descripcion se mostrara en el listado de articulos y en el carrito.
+                    </div>
+                </div>
 
             <div class="mb-4">
                     <label class="block text-white text-sm font-bold mb-2">Imágenes actuales</label>

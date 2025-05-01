@@ -54,7 +54,7 @@ class ArticuloViewController extends Controller
             $articulosFavoritos = auth()->user()->articulos_favoritos()->pluck('articulo_id')->toArray();
         }
 
-        return Inertia::render('Admin/ListadoArticulos', [
+        return Inertia::render('Articulos/ListadoArticulos', [
             'articulos' => $articulos,
             'categorias' => $categorias,
             'categoriaSeleccionada' => $categoriaId,
@@ -80,12 +80,14 @@ class ArticuloViewController extends Controller
             'imagen' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
             'categoria_id' => ['required', 'string'],
             'descripcion' => ['required', 'string'],
+            'descripcion_short' => ['required', 'string'],
             'precio' => ['required', 'min:0', 'max:9999.99', 'numeric']
         ]);
 
         $articulo = Articulo::create([
             'nombre' => $validated['nombre'],
             'descripcion' => $validated['descripcion'],
+            'descripcion_short' => $validated['descripcion_short'],
             'precio' => $validated['precio'],
             'categoria_id' => $validated['categoria_id'],
         ]);
@@ -126,6 +128,10 @@ class ArticuloViewController extends Controller
                 ->exists();
         }
 
+        // Asegurar que el campo de descuento esté disponible
+        $articulo = $articulo->toArray();
+        $articulo['descuento'] = $articulo['descuento'] ?? 0;
+
         return Inertia::render('Tienda/VerArticulo', [
             'articulo' => $articulo,
             'esFavorito' => $esFavorito
@@ -151,6 +157,7 @@ class ArticuloViewController extends Controller
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'required|string',
+            'descripcion_short' => 'required|string',
             'precio' => 'required|numeric',
             'categoria_id' => 'required|exists:categorias,id',
             'nuevas_imagenes.*' => 'nullable|image|max:2048',
@@ -162,6 +169,7 @@ class ArticuloViewController extends Controller
         $articulo->update([
             'nombre' => $validated['nombre'],
             'descripcion' => $validated['descripcion'],
+            'descripcion_short' => $validated['descripcion_short'],
             'precio' => $validated['precio'],
             'categoria_id' => $validated['categoria_id'],
         ]);

@@ -9,17 +9,18 @@ class Articulo extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nombre', 'descripcion', 'precio'];
+    protected $fillable = ['nombre', 'descripcion', 'descripcion_short', 'precio', 'descuento'];
 
     public function pedidos()
     {
-        return $this->belongsToMany(Pedido::class, 'articulo_pedido', 'articulo_id');
+        return $this->belongsToMany(Pedido::class, 'articulo_pedido', 'articulo_id', 'pedido_id')
+            ->withPivot('cantidad', 'precio');
     }
 
     public function favByUsers()
     {
         return $this->belongsToMany(User::class, 'articulos_favoritos', 'articulo_id', 'user_id')
-        ->withTimestamps();
+            ->withTimestamps();
     }
 
     public function imagenes()

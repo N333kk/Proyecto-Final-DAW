@@ -2,7 +2,8 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import 'vue3-carousel/dist/carousel.css';
 import { Carousel, Slide, Pagination, Navigation as CarouselNav } from 'vue3-carousel';
-import { ref, onMounted } from 'vue'
+import { ref, onMounted } from 'vue';
+import Navbar from '@/Components/Navbar.vue';
 
 const showCategories = ref(false);
 
@@ -96,172 +97,51 @@ const deleteArticulo = (articuloId) => {
 };
 
 // Función para manejar el clic en el artícul
+
+const calcularPrecioConDescuento = (precio, descuento) => {
+    return (precio - (precio * (descuento / 100))).toFixed(2);
+};
 </script>
 
 <template>
 <Head title="Articulos" />
     <div class="bg-gray-50 text-gray-800 dark:bg-black dark:text-white min-h-screen">
         <div class="flex flex-col items-center justify-center selection:bg-purple-500 selection:text-white dark:selection:bg-[#FF2D20]">
-            <header class="min-w-full">
-                <nav
-                    class="flex min-w-screen space-x-4 sm:justify-between justify-center p-6 bg-white shadow-sm dark:bg-black text-gray-800 dark:text-white/80 border-b border-gray-200 dark:border-white/20">
-                    <div class="space-x-4">
-                        <Link href="/" class="text-sm font-medium hover:text-purple-600 dark:hover:text-white/50 transition-colors">
-                        Inicio</Link>
-
-                        <!-- Menú desplegable de categorías - Adaptado para móvil y escritorio -->
-                        <div class="relative inline-block text-left">
-                            <!-- En móvil: toggle al hacer clic, en escritorio: hover -->
-                            <div v-if="isMobile">
-                                <button @click="toggleMenu"
-                                        class="text-sm font-medium hover:text-purple-600 dark:hover:text-white/50 transition-colors">
-                                    Articulos
-                                </button>
-                            </div>
-                            <div v-else>
-                                <Link href="/articulos"
-                                     @mouseenter="showMenu"
-                                     class="text-sm font-medium hover:text-purple-600 dark:hover:text-white/50 transition-colors">
-                                    Articulos
-                                </Link>
-                            </div>
-
-                            <!-- Menú desplegable - visible al hover en escritorio o al hacer clic en móvil -->
-                            <div v-show="showCategories"
-                                 @mouseenter="!isMobile && showMenu()"
-                                 @mouseleave="!isMobile && hideMenu()"
-                                 class="absolute z-10 left-0 mt-2 w-56 origin-top-left bg-white dark:bg-gray-800/95 rounded-md shadow-lg ring-1 ring-gray-200 dark:ring-black/50 ring-opacity-5 focus:outline-none">
-                                <!-- Botón para cerrar en dispositivos móviles -->
-                                <button v-if="isMobile"
-                                        @click="hideMenu"
-                                        class="absolute top-1 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white">
-                                    ✕
-                                </button>
-
-                                <div class="py-1" role="none">
-                                    <!-- Para móvil usamos la clase Link con el método @click -->
-                                    <template v-if="isMobile">
-                                        <div @click="hideMenu" class="text-gray-700 dark:text-white">
-                                            <Link href="/articulos"
-                                                 :class="['block px-4 py-2 text-sm hover:bg-gray-100 hover:text-purple-700 dark:hover:bg-gray-700 dark:hover:text-white',
-                                                         !categoriaSeleccionada ? 'font-bold bg-purple-50 text-purple-700 dark:bg-gray-700 dark:text-white' : '']">
-                                                Todas las categorías
-                                            </Link>
-                                        </div>
-                                    </template>
-                                    <template v-else>
-                                        <Link href="/articulos"
-                                             :class="['text-gray-700 dark:text-white block px-4 py-2 text-sm hover:bg-gray-100 hover:text-purple-700 dark:hover:bg-gray-700 dark:hover:text-white',
-                                                     !categoriaSeleccionada ? 'font-bold bg-purple-50 text-purple-700 dark:bg-gray-700 dark:text-white' : '']">
-                                            Todas las categorías
-                                        </Link>
-                                    </template>
-
-                                    <div v-for="categoria in categorias" :key="categoria.id" class="text-gray-800 dark:text-white">
-                                        <!-- Categoría padre -->
-                                        <template v-if="isMobile">
-                                            <div @click="hideMenu">
-                                                <Link :href="`/articulos?categoria=${categoria.id}`"
-                                                     :class="['block px-4 py-2 text-sm font-bold hover:bg-gray-100 hover:text-purple-700 dark:hover:bg-gray-700 dark:hover:text-white',
-                                                             categoriaSeleccionada == categoria.id ? 'bg-purple-50 text-purple-700 dark:bg-gray-700 dark:text-white' : '']">
-                                                    {{ categoria.nombre }}
-                                                </Link>
-                                            </div>
-                                        </template>
-                                        <template v-else>
-                                            <Link :href="`/articulos?categoria=${categoria.id}`"
-                                                 :class="['block px-4 py-2 text-sm font-bold hover:bg-gray-100 hover:text-purple-700 dark:hover:bg-gray-700 dark:hover:text-white',
-                                                         categoriaSeleccionada == categoria.id ? 'bg-purple-50 text-purple-700 dark:bg-gray-700 dark:text-white' : '']">
-                                                {{ categoria.nombre }}
-                                            </Link>
-                                        </template>
-
-                                        <!-- Subcategorías -->
-                                        <div v-if="categoria.subcategorias && categoria.subcategorias.length > 0">
-                                            <template v-if="isMobile">
-                                                <div v-for="subcategoria in categoria.subcategorias"
-                                                     :key="subcategoria.id"
-                                                     @click="hideMenu">
-                                                    <Link :href="`/articulos?categoria=${subcategoria.id}`"
-                                                         :class="['block px-8 py-1 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 hover:text-purple-700 dark:hover:bg-gray-700 dark:hover:text-white',
-                                                                 categoriaSeleccionada == subcategoria.id ? 'bg-purple-50 text-purple-700 dark:bg-gray-700 dark:text-white font-semibold' : '']">
-                                                        {{ subcategoria.nombre }}
-                                                    </Link>
-                                                </div>
-                                            </template>
-                                            <template v-else>
-                                                <Link v-for="subcategoria in categoria.subcategorias"
-                                                     :key="subcategoria.id"
-                                                     :href="`/articulos?categoria=${subcategoria.id}`"
-                                                     :class="['block px-8 py-1 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 hover:text-purple-700 dark:hover:bg-gray-700 dark:hover:text-white',
-                                                             categoriaSeleccionada == subcategoria.id ? 'bg-purple-50 text-purple-700 dark:bg-gray-700 dark:text-white font-semibold' : '']">
-                                                    {{ subcategoria.nombre }}
-                                                </Link>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <Link v-if="$page.props.auth.user" href="/pedidos"
-                            class="text-sm font-medium hover:text-purple-600 dark:hover:text-white/50 transition-colors">Pedidos</Link>
-                        <Link v-if="$page.props.auth.user" href="/perfil"
-                            class="text-sm font-medium hover:text-purple-600 dark:hover:text-white/50 transition-colors">{{
-                                $page.props.auth.user.name }}</Link>
-                        <template v-else>
-                            <Link href="/login" class="text-sm font-medium hover:text-purple-600 dark:hover:text-white/50 transition-colors">
-                            Log in
-                            </Link>
-                            <Link href="/register"
-                                class="text-sm font-medium hover:text-purple-600 dark:hover:text-white/50 transition-colors">
-                            Register
-                            </Link>
-                        </template>
-                        <Link v-if="$page.props.auth.user && $page.props.auth.user.rol == 'admin'" href="/dashboard"
-                            class="text-sm font-medium hover:text-purple-600 dark:hover:text-white/50 transition-colors">Dashboard</Link>
-                    </div>
-                    <div class="flex">
-                        <form v-if="$page.props.auth.user" @submit.prevent="logout">
-                            <button type="submit"
-                                class="text-sm font-medium px-4 text-gray-700 dark:text-white/80 hover:text-purple-600 dark:hover:text-white/50 transition-colors">
-                                Log Out
-                            </button>
-                        </form>
-                        <Link v-if="$page.props.auth.user" href="/cart">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="size-6 stroke-gray-700 hover:stroke-purple-600 dark:stroke-white dark:hover:stroke-white/50 transition-colors">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                        </svg>
-                        </Link>
-                    </div>
-                </nav>
-            </header>
+            <Navbar />
 
             <div class="">
-                <div class="py-4 border-b w-full border-b-gray-200 dark:border-b-white/20 bg-gradient-to-r from-purple-50 to-white dark:from-black dark:to-transparent flex justify-between items-center">
-                    <h2 class="text-gray-800 dark:text-white py-2 px-4 mx-4 font-bold text-4xl">
+                <div class="py-4 border-b w-full border-b-gray-200 dark:border-b-white/20 bg-gradient-to-r from-purple-50 to-transparent dark:from-purple-900/10 dark:to-transparent flex justify-between items-center">
+                    <h2 class="text-gray-800 dark:text-white py-2 px-8 font-extrabold text-4xl flex items-center">
                         Listado de artículos
-                        <span v-if="categoriaSeleccionada" class="text-xl text-gray-500 dark:text-gray-300">
+                        <span v-if="categoriaSeleccionada" class="ml-3 text-xl font-normal text-gray-500 dark:text-gray-300">
                             (Filtrado por categoría)
                         </span>
                     </h2>
                     <Link v-if="$page.props.auth.user && $page.props.auth.user.rol === 'admin'" href="/articulos/create"
-                        class="bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 dark:from-onyx-400 dark:to-onyx-600 dark:hover:from-onyx-500 dark:hover:to-onyx-700 transition-all hover:px-8 text-white font-bold py-2 px-4 mx-4 rounded-full relative group shadow-md">
+                        class="bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 dark:from-purple-600 dark:to-purple-700 dark:hover:from-purple-700 dark:hover:to-purple-800 transition-all hover:px-8 text-white font-bold py-2 px-4 mx-8 rounded-lg shadow-md">
                         <span class="block group-hover:hidden transition-all">+</span>
                         <p class="hidden group-hover:block transition-all">Nuevo Articulo</p>
                     </Link>
                 </div>
                 <!-- Grid responsivo con distribución específica de columnas -->
-                <div class="p-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 sm:gap-3 md:gap-4">
+                <div class="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
                     <!-- Tarjetas con tamaño dinámico que se adaptan al contenedor -->
-                    <div class="rounded-lg transition-all w-full relative group overflow-hidden shadow-sm hover:shadow-md border border-gray-200 dark:border-transparent"
+                    <div class="rounded-xl transition-all w-full relative group overflow-hidden shadow-sm hover:shadow-xl border border-gray-200 dark:border-gray-700/30 bg-white dark:bg-gray-800/40 hover:scale-[1.02] duration-300"
                          v-for="articulo in articulos"
                          :key="articulo.id">
+
+                        <!-- Etiqueta con el precio -->
+                        <div class="absolute top-2 right-2 z-20 bg-gradient-to-r from-purple-500 to-purple-600 dark:from-purple-600 dark:to-indigo-700 text-white py-1 px-3 rounded-full shadow-lg text-sm font-bold">
+                            <div v-if="articulo.descuento && articulo.descuento > 0" class="flex flex-col items-end">
+                                <span class="line-through text-white/70 text-xs">{{ articulo.precio }}€</span>
+                                <span>{{ calcularPrecioConDescuento(articulo.precio, articulo.descuento) }}€</span>
+                            </div>
+                            <span v-else>{{ articulo.precio }}€</span>
+                        </div>
+
                         <!-- Carousel sin Link para evitar la redirección -->
                         <Carousel
-                            class="w-full rounded-lg carousel-custom bg-white dark:bg-gray-800"
+                            class="w-full rounded-t-xl carousel-custom bg-white dark:bg-gray-800"
                             ref="carousel"
                             :items-to-show="1"
                             :wrap-around="true"
@@ -288,6 +168,23 @@ const deleteArticulo = (articuloId) => {
                                 <CarouselNav />
                             </template>
                         </Carousel>
+
+                        <!-- Información del artículo -->
+                        <div class="p-4">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1 line-clamp-1">{{ articulo.nombre }}</h3>
+
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-500 dark:text-gray-400">{{ articulo.categoria ? articulo.categoria.nombre : 'Sin categoría' }}</span>
+
+                                <!-- Indicador de favorito (corazón) -->
+                                <div v-if="$page.props.auth.user && favoritosLocales.includes(articulo.id)"
+                                     class="text-pink-500 dark:text-pink-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                                        <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-5.201-3.893 10.225 10.225 0 01-2.56-6.625A5.868 5.868 0 019.033 5.25c1.292 0 2.526.503 3.467 1.404a6.625 6.625 0 013.467-1.404 5.868 5.868 0 015.18 5.127 10.225 10.225 0 01-2.56 6.625 15.247 15.247 0 01-5.2 3.893l-.023.012-.007.003h0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Overlay con botones (visible al hacer hover) - Con mayor transparencia -->
                         <div class="absolute inset-0 bg-gradient-to-t from-gray-800/60 via-transparent to-transparent dark:from-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2 z-10 pointer-events-none">
@@ -370,39 +267,52 @@ const deleteArticulo = (articuloId) => {
 
 .carousel-custom .carousel__prev,
 .carousel-custom .carousel__next {
-    background-color: rgba(128, 128, 128, 0.7) !important; /* Gris semitransparente */
+    background-color: rgba(139, 92, 246, 0.6) !important; /* Color púrpura semitransparente */
     border-radius: 50%;
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     z-index: 5;
+    backdrop-filter: blur(3px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .carousel-custom .carousel__prev {
-    left: 5px; /* Posición desde el borde izquierdo */
+    left: 8px; /* Posición desde el borde izquierdo */
 }
 
 .carousel-custom .carousel__next {
-    right: 5px; /* Posición desde el borde derecho */
+    right: 8px; /* Posición desde el borde derecho */
 }
 
 .carousel-custom .carousel__prev:hover,
 .carousel-custom .carousel__next:hover {
-    background-color: rgba(128, 128, 128, 0.9) !important; /* Gris más oscuro al hover */
+    background-color: rgba(139, 92, 246, 0.9) !important; /* Púrpura más sólido al hover */
     transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
 
 /* Aseguramos que los iconos dentro de los botones sean blancos */
 .carousel-custom .carousel__prev i,
 .carousel-custom .carousel__next i {
     color: white !important;
+    font-size: 1.2rem;
+}
+
+/* Efecto de escala al pasar el ratón sobre la imagen */
+.carousel__slide img {
+    transition: transform 0.3s ease;
+}
+
+.carousel__slide:hover img {
+    transform: scale(1.03);
 }
 </style>

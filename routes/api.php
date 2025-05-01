@@ -26,4 +26,4 @@ Route::delete('/imagenes/{id}', [ImagenController::class, 'destroy']);
 
 Route::apiResource('/clientes', ClienteController::class);
 
-Route::apiResource('/pedidos', PedidosController::class);
+//Route::apiResource('/pedidos', PedidosController::class);

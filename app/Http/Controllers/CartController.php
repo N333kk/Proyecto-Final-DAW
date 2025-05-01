@@ -148,15 +148,25 @@ class CartController extends Controller
                 $images[] = asset('images/placeholder.png');
             }
 
+            // Calcular el precio con descuento si existe
+            $precioUnitario = $item->articulo->precio;
+            $descuentoTexto = "";
+
+            if (!empty($item->articulo->descuento) && $item->articulo->descuento > 0) {
+                $precioOriginal = $precioUnitario;
+                $precioUnitario = $precioUnitario * (1 - ($item->articulo->descuento / 100));
+                $descuentoTexto = " (-{$item->articulo->descuento}% descuento)";
+            }
+
             $lineItems[] = [
                 'price_data' => [
                     'currency' => 'eur',
                     'product_data' => [
-                        'name' => $item->articulo->nombre,
+                        'name' => $item->articulo->nombre . $descuentoTexto,
                         'images' => $images,
-                        'description' => $item->articulo->descripcion,
+                        'description' => $item->articulo->descripcion_short,
                     ],
-                    'unit_amount' => $item->precio * 100, // Stripe usa céntimos...
+                    'unit_amount' => round($precioUnitario * 100), // Stripe usa céntimos
                 ],
                 'quantity' => $item->cantidad,
             ];
@@ -187,7 +197,16 @@ class CartController extends Controller
 
             $user = Auth::user();
             $cart = Cart::where('user_id', $user->id)->first();
+
+            if (!$cart) {
+                return redirect()->route('cart.show')->with('error', 'No se encontró el carrito de compras.');
+            }
+
             $cartItems = CartItem::with('articulo')->where('cart_id', $cart->id)->get();
+
+            if ($cartItems->isEmpty()) {
+                return redirect()->route('cart.show')->with('error', 'El carrito está vacío.');
+            }
 
             // Crear el pedido
             $pedido = new Pedido();
@@ -198,17 +217,35 @@ class CartController extends Controller
 
             // Añadir los artículos al pedido
             foreach ($cartItems as $item) {
-                $pedido->articulo()->attach($item->articulo_id, [
+                // Calcular el precio con descuento
+                $precioUnitario = $item->articulo->precio;
+
+                if (!empty($item->articulo->descuento) && $item->articulo->descuento > 0) {
+                    $precioUnitario = $precioUnitario * (1 - ($item->articulo->descuento / 100));
+                }
+
+                $pedido->articulos()->attach($item->articulo_id, [
                     'cantidad' => $item->cantidad,
-                    'precio' => $item->precio
+                    'precio' => round($precioUnitario, 2), // Guardamos el precio con descuento ya aplicado
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
             }
 
-            // Limpiamos el carrito, no usamos la funcion clearCart() para evitar el redirect
+            // Limpiamos el carrito - Nos aseguramos de que funcione correctamente
             CartItem::where('cart_id', $cart->id)->delete();
 
-            return redirect()->route('/pedidos')->with('success', 'Pedido realizado con éxito.');
+            // Forzamos una regeneración de la sesión para evitar problemas de caché
+            $request->session()->regenerate();
+
+            // Log para debugging
+            \Log::info('Pedido creado con éxito. ID: ' . $pedido->id);
+            \Log::info('Redirigiendo a: ' . route('pedidos.index'));
+
+            // Redirigimos usando el nombre de ruta correcto
+            return redirect()->to('/pedidos')->with('success', 'Pedido realizado con éxito.');
         } catch (\Exception $e) {
+            \Log::error('Error en checkout success: ' . $e->getMessage());
             return redirect()->route('cart.show')->with('error', 'Error al procesar el pago: ' . $e->getMessage());
         }
     }

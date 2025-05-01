@@ -11,17 +11,36 @@ use Inertia\Inertia;
 
 class AdminController extends Controller
 {
-    public function show()
+    public function show(Request $request)
     {
         $user = Auth::user();
-        if($user->rol !== 'admin'){
+        if ($user->rol !== 'admin') {
             return redirect()->route('no-auth');
-        } else {
-            return Inertia::render('Admin/Dashboard', [
-                'users' => User::orderBy('updated_at','desc')->get(),
-                'articulos' => Articulo::orderBy('updated_at','desc')->get(),
-                'pedidos' => Pedido::orderBy('updated_at','desc')->get(),
-            ]);
+        }
+
+        $articulos = Articulo::select('id', 'nombre', 'descripcion_short', 'precio', 'descuento', 'updated_at')->get();
+        $articulosFormateados = $articulos->map(function ($articulo) {
+            $categorias = $articulo->categoria;
+            $categoriaNombre = count($categorias) > 0 ? $categorias[0]->nombre : 'Sin categoría';
+
+            return [
+                'id' => $articulo->id,
+                'nombre' => $articulo->nombre,
+                'descripcion_short' => $articulo->descripcion_short,
+                'precio' => $articulo->precio,
+                'descuento' => $articulo->descuento,
+                'categoria' => $categoriaNombre,
+                'updated_at' => $articulo->updated_at
+            ];
+        });
+
+        $pedidos = Pedido::all();
+        $users = User::all();
+
+        return Inertia::render('Admin/Dashboard', [
+            'articulos' => $articulosFormateados,
+            'pedidos' => $pedidos,
+            'users' => $users
+        ]);
     }
-}
 }

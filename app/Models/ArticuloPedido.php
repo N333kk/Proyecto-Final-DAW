@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class ArticuloPedido extends Model
 {
+    protected $table = 'articulo_pedido';
+
+    protected $fillable = ['articulo_id', 'pedido_id', 'cantidad', 'precio'];
 
     public function pedido()
     {
@@ -16,5 +19,4 @@ class ArticuloPedido extends Model
     {
         return $this->belongsTo(Articulo::class);
     }
-
 }

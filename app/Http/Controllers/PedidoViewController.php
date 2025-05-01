@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 
-class PedidosViewController extends Controller
+class PedidoViewController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -26,9 +26,9 @@ class PedidosViewController extends Controller
             return Gate::allows('view', $pedido);
         });
 
-        return Inertia::render('Admin/ListadoPedidos', [
-                'pedidos' => $filteredPedidos,
-                'usuarios' => $usuariosConPedidos,
+        return Inertia::render('Pedidos/ListadoPedidos', [
+            'pedidos' => $filteredPedidos,
+            'usuarios' => $usuariosConPedidos,
         ]);
     }
 
@@ -45,7 +45,7 @@ class PedidosViewController extends Controller
      */
     public function store(Request $request)
     {
-        if(Auth::user()->direccion_envio == null){
+        if (Auth::user()->direccion_envio == null) {
             return redirect()->route('perfil')->with('error', 'Tienes que tener una direccion de envio!');
         }
         $pedido = new Pedido();
@@ -63,8 +63,6 @@ class PedidosViewController extends Controller
         CartItem::where('user_id', Auth::id())->delete();
 
         return redirect()->route('tienda')->with('success', 'Pedido creado exitosamente.');
-
-
     }
 
     /**
@@ -76,6 +74,42 @@ class PedidosViewController extends Controller
     }
 
     /**
+     * Mostrar los detalles de un pedido específico.
+     */
+    public function detalle($id)
+    {
+        // Obtener el pedido por ID
+        $pedido = Pedido::findOrFail($id);
+
+        // Verificar que el usuario tiene permiso para ver el pedido
+        if (Gate::denies('view', $pedido)) {
+            abort(403, 'No tienes permiso para ver este pedido.');
+        }
+
+        // Cargar el pedido con todas las relaciones necesarias
+        $pedido->load(['user', 'articulos' => function ($query) {
+            $query->with('imagenes');
+        }]);
+
+        // Transformar la relación pivot para obtener los datos necesarios
+        $articulosPedido = $pedido->articulos->map(function ($articulo) {
+            return [
+                'id' => $articulo->id,
+                'articulo' => $articulo,
+                'cantidad' => $articulo->pivot->cantidad,
+                'precio' => $articulo->pivot->precio ?: $articulo->precio, // Si no hay precio en el pivot, usar el precio actual
+            ];
+        });
+
+        // Asignar los artículos transformados al pedido
+        $pedido->articulos_pedido = $articulosPedido;
+
+        return Inertia::render('Pedidos/DetallePedido', [
+            'pedido' => $pedido
+        ]);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Pedido $pedido)
@@ -83,7 +117,6 @@ class PedidosViewController extends Controller
         return Inertia::render('Admin/EditarPedido', [
             'pedido' => $pedido
         ]);
-
     }
 
     /**
@@ -94,9 +127,9 @@ class PedidosViewController extends Controller
         $pedido->update([
             'direccion_envio' => $request->direccion_envio,
             'estado' => $request->estado,
-            ]);
+        ]);
 
-            return redirect()->route('pedidos.index');
+        return redirect()->route('pedidos.index');
     }
 
     /**
@@ -105,6 +138,7 @@ class PedidosViewController extends Controller
     public function destroy(Pedido $pedido)
     {
         $pedido->delete();
+
         return redirect()->back()->with('success', 'Pedido cancelado correctamente');
     }
 }

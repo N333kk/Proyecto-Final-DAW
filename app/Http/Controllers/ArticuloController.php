@@ -27,6 +27,7 @@ class ArticuloController extends Controller
         $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'required|string',
+            'descripcion_short' => 'required|string',
             'precio' => 'required|numeric',
             'categoria_id' => 'required|exists:categorias,id',
             'imagen' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
@@ -35,6 +36,7 @@ class ArticuloController extends Controller
         $articulo = new Articulo;
         $articulo->nombre = $request->nombre;
         $articulo->descripcion = $request->descripcion;
+        $articulo->descripcion_short = $request->descripcion_short;
         $articulo->precio = $request->precio;
         $articulo->save();
 
@@ -77,6 +79,7 @@ class ArticuloController extends Controller
         $rules = [
             'nombre' => 'required|string|max:255',
             'descripcion' => 'required|string',
+            'descripcion_short' => 'required|string',
             'precio' => 'required|numeric',
             'categoria_id' => 'required|exists:categorias,id',
             'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
