@@ -60,16 +60,12 @@ const calcularTotal = (items) => {
                             </h3>
                             <div class="space-y-3 mt-6">
                                 <div class="flex items-center">
-                                    <span class="font-medium text-gray-800 dark:text-white min-w-32">Cliente:</span>
+                                    <span class="font-medium text-gray-800 dark:text-white min-w-36">Cliente:</span>
                                     <span class="text-gray-700 dark:text-gray-300">{{ pedido.user.name }}</span>
                                 </div>
                                 <div class="flex items-start">
-                                    <span class="font-medium text-gray-800 dark:text-white min-w-32">Dirección de envio:</span>
+                                    <span class="font-medium text-gray-800 dark:text-white min-w-36">Dirección de envio:</span>
                                     <span class="text-gray-700 dark:text-gray-300">{{ pedido.direccion_envio }}</span>
-                                </div>
-                                <div class="flex items-start">
-                                    <span class="font-medium text-gray-800 dark:text-white min-w-32">Dirección de facturacion:</span>
-                                    <span class="text-gray-700 dark:text-gray-300">{{ pedido.direccion_facturacion }}</span>
                                 </div>
                             </div>
                         </div>
