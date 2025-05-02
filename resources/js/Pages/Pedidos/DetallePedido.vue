@@ -64,8 +64,12 @@ const calcularTotal = (items) => {
                                     <span class="text-gray-700 dark:text-gray-300">{{ pedido.user.name }}</span>
                                 </div>
                                 <div class="flex items-start">
-                                    <span class="font-medium text-gray-800 dark:text-white min-w-32">Dirección:</span>
+                                    <span class="font-medium text-gray-800 dark:text-white min-w-32">Dirección de envio:</span>
                                     <span class="text-gray-700 dark:text-gray-300">{{ pedido.direccion_envio }}</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="font-medium text-gray-800 dark:text-white min-w-32">Dirección de facturacion:</span>
+                                    <span class="text-gray-700 dark:text-gray-300">{{ pedido.direccion_facturacion }}</span>
                                 </div>
                             </div>
                         </div>
