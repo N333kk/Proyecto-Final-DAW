@@ -56,4 +56,7 @@ Route::middleware([
     // Rutas para favoritos
     Route::post('/favoritos/{id}', [ArticuloFavoritoController::class, 'toggleFavorito'])->name('favoritos.toggle');
     Route::get('/favoritos', [ArticuloFavoritoController::class, 'index'])->name('favoritos.index');
+
+    // Rutas para la gestión de tallas
+    Route::resource('tallas', \App\Http\Controllers\TallaController::class);
 });

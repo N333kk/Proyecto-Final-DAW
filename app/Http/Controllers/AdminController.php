@@ -18,10 +18,17 @@ class AdminController extends Controller
             return redirect()->route('no-auth');
         }
 
-        $articulos = Articulo::select('id', 'nombre', 'descripcion_short', 'precio', 'descuento', 'updated_at')->get();
+        // Cargar artículos con sus tallas para calcular el stock
+        $articulos = Articulo::with(['tallas', 'categoria'])->get();
+
         $articulosFormateados = $articulos->map(function ($articulo) {
             $categorias = $articulo->categoria;
             $categoriaNombre = count($categorias) > 0 ? $categorias[0]->nombre : 'Sin categoría';
+
+            // Calcular el stock total sumando el stock de todas las tallas
+            $stockTotal = $articulo->tallas->sum(function ($talla) {
+                return $talla->pivot->stock;
+            });
 
             return [
                 'id' => $articulo->id,
@@ -30,6 +37,7 @@ class AdminController extends Controller
                 'precio' => $articulo->precio,
                 'descuento' => $articulo->descuento,
                 'categoria' => $categoriaNombre,
+                'stockTotal' => $stockTotal,
                 'updated_at' => $articulo->updated_at
             ];
         });

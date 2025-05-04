@@ -28,7 +28,7 @@ class CartController extends Controller
         ]);
     }
 
-    public function store($id)
+    public function store(Request $request, $id)
     {
         $user = Auth::user();
         $cart = Cart::firstOrCreate([
@@ -36,44 +36,96 @@ class CartController extends Controller
         ]);
         $articulo = Articulo::findOrFail($id);
 
-        $cartItem = CartItem::firstOrCreate(
-            ['cart_id' => $cart->id, 'articulo_id' => $id],
-            ['cantidad' => 0, 'precio' => $articulo->precio]
-        );
-
-        $cartItem->increment('cantidad', 1);
-
-        return redirect()->route('cart.show');
-    }
-
-    public function update($id)
-    {
-        $user = Auth::user();
-        $cart = Cart::firstOrCreate([
-            'user_id' => $user->id
+        // Validar que se seleccionó una talla
+        $request->validate([
+            'talla_id' => 'required|exists:tallas,id',
+        ], [
+            'talla_id.required' => 'Debes seleccionar una talla',
+            'talla_id.exists' => 'La talla seleccionada no es válida',
         ]);
-        $articulo = Articulo::findOrFail($id);
 
-        $cartItem = CartItem::firstOrCreate(
-            ['cart_id' => $cart->id, 'articulo_id' => $id],
-            ['cantidad' => 0, 'precio' => $articulo->precio]
-        );
-        if ($cartItem->cantidad > 1) {
-            $cartItem->decrement('cantidad', 1);
+        // Verificamos si existe el artículo con la talla específica en el carrito
+        $cartItem = CartItem::where('cart_id', $cart->id)
+            ->where('articulo_id', $id)
+            ->where('talla_id', $request->talla_id)
+            ->first();
+
+        if ($cartItem) {
+            // Si ya existe este artículo con la misma talla, incrementamos la cantidad
+            $cartItem->increment('cantidad', 1);
         } else {
-            $cartItem->delete();
+            // Si no existe, creamos un nuevo item con la talla seleccionada
+            CartItem::create([
+                'cart_id' => $cart->id,
+                'articulo_id' => $id,
+                'talla_id' => $request->talla_id,
+                'cantidad' => 1,
+                'precio' => $articulo->precio
+            ]);
         }
 
+        if ($request->ajax()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()->route('cart.show');
     }
 
-    public function removeFromCart($id)
+    public function update(Request $request, $id)
     {
         $user = Auth::user();
-        $cart = Cart::where('user_id', $user->id)->first(); // Added first() to get the cart instance
-        $cartItem = CartItem::where('articulo_id', $id)->where('cart_id', $cart->id)->firstOrFail();
-        $cartItem->delete();
+        $cart = Cart::firstOrCreate([
+            'user_id' => $user->id
+        ]);
+
+        // Asegurarnos de que venga la talla
+        $request->validate([
+            'talla_id' => 'required|exists:tallas,id',
+        ]);
+
+        $cartItem = CartItem::where('cart_id', $cart->id)
+            ->where('articulo_id', $id)
+            ->where('talla_id', $request->talla_id)
+            ->first();
+
+        if ($cartItem) {
+            if ($cartItem->cantidad > 1) {
+                $cartItem->decrement('cantidad', 1);
+            } else {
+                $cartItem->delete();
+            }
+        }
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true]);
+        }
+
+        return redirect()->route('cart.show');
+    }
+
+    public function removeFromCart(Request $request, $id)
+    {
+        $user = Auth::user();
+        $cart = Cart::where('user_id', $user->id)->first();
+
+        if ($request->has('talla_id')) {
+            // Si especificamos una talla, eliminamos solo ese item específico
+            $cartItem = CartItem::where('cart_id', $cart->id)
+                ->where('articulo_id', $id)
+                ->where('talla_id', $request->talla_id)
+                ->firstOrFail();
+
+            $cartItem->delete();
+        } else {
+            // Si no especificamos talla, eliminamos todos los items de ese artículo
+            CartItem::where('cart_id', $cart->id)
+                ->where('articulo_id', $id)
+                ->delete();
+        }
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()->back()->with('success', 'Artículo eliminado del carrito.');
     }
@@ -202,7 +254,7 @@ class CartController extends Controller
                 return redirect()->route('cart.show')->with('error', 'No se encontró el carrito de compras.');
             }
 
-            $cartItems = CartItem::with('articulo')->where('cart_id', $cart->id)->get();
+            $cartItems = CartItem::with(['articulo', 'talla'])->where('cart_id', $cart->id)->get();
 
             if ($cartItems->isEmpty()) {
                 return redirect()->route('cart.show')->with('error', 'El carrito está vacío.');
@@ -226,13 +278,33 @@ class CartController extends Controller
 
                 $pedido->articulos()->attach($item->articulo_id, [
                     'cantidad' => $item->cantidad,
-                    'precio' => round($precioUnitario, 2), // Guardamos el precio con descuento ya aplicado
+                    'precio' => round($precioUnitario, 2),
+                    'talla_id' => $item->talla_id,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
+
+                // Actualizar el stock de la talla
+                if ($item->talla_id) {
+                    // Obtenemos la relación intermedia articulo_tallas
+                    $articuloTalla = \DB::table('articulo_tallas')
+                        ->where('articulo_id', $item->articulo_id)
+                        ->where('talla_id', $item->talla_id)
+                        ->first();
+
+                    if ($articuloTalla) {
+                        // Descontamos la cantidad del stock
+                        \DB::table('articulo_tallas')
+                            ->where('articulo_id', $item->articulo_id)
+                            ->where('talla_id', $item->talla_id)
+                            ->decrement('stock', $item->cantidad);
+
+                        \Log::info("Stock actualizado: Artículo {$item->articulo_id}, Talla {$item->talla_id}, Cantidad {$item->cantidad}");
+                    }
+                }
             }
 
-            // Limpiamos el carrito - Nos aseguramos de que funcione correctamente
+            // Limpiamos el carrito
             CartItem::where('cart_id', $cart->id)->delete();
 
             // Forzamos una regeneración de la sesión para evitar problemas de caché
@@ -240,9 +312,8 @@ class CartController extends Controller
 
             // Log para debugging
             \Log::info('Pedido creado con éxito. ID: ' . $pedido->id);
-            \Log::info('Redirigiendo a: ' . route('pedidos.index'));
 
-            // Redirigimos usando el nombre de ruta correcto
+            // Redirigimos al listado de pedidos
             return redirect()->to('/pedidos')->with('success', 'Pedido realizado con éxito.');
         } catch (\Exception $e) {
             \Log::error('Error en checkout success: ' . $e->getMessage());

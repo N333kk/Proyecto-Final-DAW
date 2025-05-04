@@ -28,6 +28,12 @@ class Articulo extends Model
         return $this->hasMany(Imagen::class);
     }
 
+    public function tallas()
+    {
+        return $this->belongsToMany(Tallas::class, 'articulo_tallas', 'articulo_id', 'talla_id')
+            ->withPivot('stock');
+    }
+
     public function categoria()
     {
         return $this->belongsToMany(Categoria::class, 'articulo_categoria', 'articulo_id');

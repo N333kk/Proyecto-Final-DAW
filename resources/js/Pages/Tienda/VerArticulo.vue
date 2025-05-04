@@ -19,6 +19,46 @@ const props = defineProps({
 
 // Usamos un ref para poder cambiar su estado reactivamente cuando el usuario hace clic
 const esFavoritoActual = ref(props.esFavorito);
+const selectedTallaId = ref(null); // Variable para almacenar la talla seleccionada
+const tallaError = ref(''); // Variable para mostrar mensajes de error
+
+// Mostrar mensaje si no hay tallas disponibles o con stock
+const hayTallasDisponibles = computed(() => {
+    if (!props.articulo.tallas || props.articulo.tallas.length === 0) return false;
+    return props.articulo.tallas.some(talla => talla.pivot.stock > 0);
+});
+
+// Función para añadir al carrito con talla seleccionada
+const addToCart = () => {
+    // Validar que se ha seleccionado una talla
+    if (!selectedTallaId.value) {
+        tallaError.value = 'Por favor, selecciona una talla';
+        return;
+    }
+
+    // Validar que la talla seleccionada tiene stock
+    const tallaSeleccionada = props.articulo.tallas.find(t => t.id === selectedTallaId.value);
+    if (!tallaSeleccionada || tallaSeleccionada.pivot.stock <= 0) {
+        tallaError.value = 'Esta talla no está disponible';
+        return;
+    }
+
+    // Enviar al servidor con la talla seleccionada
+    router.post(route('cart.store', { id: props.articulo.id }), {
+        talla_id: selectedTallaId.value
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Limpiar mensaje de error y talla seleccionada después de añadir exitosamente
+            tallaError.value = '';
+            selectedTallaId.value = null;
+        },
+        onError: (errors) => {
+            // Mostrar error de validación
+            tallaError.value = errors.talla_id || 'Ha ocurrido un error';
+        }
+    });
+};
 
 const toggleFavorito = () => {
     // Actualización optimista: cambiamos el estado visual inmediatamente
@@ -222,22 +262,54 @@ const precioConDescuento = computed(() => {
                                         {{ articulo.precio }} €
                                     </p>
 
-                                    <p class="text-sm text-green-600 dark:text-green-400 mt-1">✓ En stock</p>
+                                    <p v-if="hayTallasDisponibles" class="text-sm text-green-600 dark:text-green-400 mt-1">
+                                        ✓ En stock
+                                    </p>
+                                    <p v-else class="text-sm text-red-600 dark:text-red-400 mt-1">
+                                        ✕ Sin stock disponible
+                                    </p>
+                                </div>
+
+                                <!-- Selector de tallas -->
+                                <div class="mb-6">
+                                    <h3 class="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
+                                        Selecciona tu talla
+                                    </h3>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button
+                                            v-for="talla in articulo.tallas"
+                                            :key="talla.id"
+                                            @click="selectedTallaId = talla.id"
+                                            :disabled="talla.pivot.stock <= 0"
+                                            :class="[
+                                                'px-4 py-2 border rounded-md transition-colors font-medium',
+                                                selectedTallaId === talla.id ? 'bg-purple-600 text-white border-purple-600' : 'border-gray-300',
+                                                talla.pivot.stock <= 0 ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-500' : 'hover:border-purple-300'
+                                            ]"
+                                        >
+                                            {{ talla.nombre }}
+                                            <span v-if="talla.pivot.stock <= 0" class="text-xs ml-1">(Agotada)</span>
+                                        </button>
+                                    </div>
+                                    <p v-if="tallaError" class="text-red-500 text-sm mt-2">{{ tallaError }}</p>
                                 </div>
 
                                 <div class="flex flex-col sm:flex-row gap-3">
-                                    <Link
-                                        :href="route('cart.store', { id: articulo.id })"
-                                        method="post"
-                                        as="button"
-                                        type="button"
-                                        class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 shadow-sm hover:shadow flex items-center justify-center"
+                                    <button
+                                        @click="addToCart"
+                                        :disabled="!hayTallasDisponibles"
+                                        :class="[
+                                            'flex-1 font-semibold py-3 px-4 rounded-lg transition-all duration-300 shadow-sm hover:shadow flex items-center justify-center',
+                                            hayTallasDisponibles ?
+                                                'bg-purple-600 hover:bg-purple-700 text-white' :
+                                                'bg-gray-400 cursor-not-allowed text-white'
+                                        ]"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                                         </svg>
                                         Añadir al carrito
-                                    </Link>
+                                    </button>
 
                                     <Link
                                         v-if="$page.props.auth.user"

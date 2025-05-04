@@ -246,6 +246,11 @@ const cartItemCount = computed(() => {
                                         </button>
                                     </div>
 
+                                    <!-- Mostrar la talla -->
+                                    <div v-if="item.talla" class="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md">
+                                        Talla: {{ item.talla.nombre }}
+                                    </div>
+
                                     <!-- Precio con descuento aplicado -->
                                     <div class="ml-auto">
                                         <div v-if="item.articulo.descuento && item.articulo.descuento > 0" class="flex flex-col items-end">
@@ -393,6 +398,20 @@ const cartItemCount = computed(() => {
                                             </button>
                                         </div>
                                         <span class="text-gray-600 dark:text-white/60 text-sm">Subtotal: <span class="font-semibold text-gray-900 dark:text-white">{{ (selectedItem.cantidad * obtenerPrecioFinal(selectedItem.articulo)).toFixed(2) }} €</span></span>
+                                    </div>
+                                </div>
+
+                                <!-- Mostrar la talla seleccionada -->
+                                <div v-if="selectedItem.talla" class="mb-6">
+                                    <h3 class="text-lg font-semibold mb-3 flex items-center text-gray-800 dark:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
+                                        </svg>
+                                        Talla seleccionada
+                                    </h3>
+                                    <div class="inline-block px-4 py-2 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-medium rounded-lg">
+                                        {{ selectedItem.talla.nombre }}
                                     </div>
                                 </div>
 

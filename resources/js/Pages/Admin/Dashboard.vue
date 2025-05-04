@@ -118,13 +118,21 @@ const limitarTexto = (texto, longitud) => {
 
                 <!-- Listado de artículos -->
                 <div class="bg-white dark:bg-gray-800/40 rounded-xl shadow-sm overflow-hidden border border-gray-200 dark:border-white/5 mb-8">
-                    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                         <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                             </svg>
                             Listado de Artículos
                         </h3>
+                        <div class="flex space-x-2">
+                            <Link :href="route('tallas.create')" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors">
+                                Crear Nueva Talla
+                            </Link>
+                            <Link :href="route('tallas.index')" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-md transition-colors">
+                                Gestionar Tallas
+                            </Link>
+                        </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed">
@@ -134,7 +142,8 @@ const limitarTexto = (texto, longitud) => {
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[10%]">Categoría</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[30%]">Descripción</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[8%]">Precio</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[10%]">Descuento</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[8%]">Descuento</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[8%]">Stock Total</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[12%]">Última Actualización</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[15%]">Acciones</th>
                                 </tr>
@@ -155,6 +164,17 @@ const limitarTexto = (texto, longitud) => {
                                         </span>
                                         <span v-else class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
                                             Sin descuento
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <!-- Stock Total -->
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                              :class="{
+                                                'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300': articulo.stockTotal < 10,
+                                                'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300': articulo.stockTotal >= 10 && articulo.stockTotal < 50,
+                                                'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300': articulo.stockTotal >= 50
+                                              }">
+                                            {{ articulo.stockTotal || 0 }} unidades
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ articulo.updated_at.slice(0,10) }}</td>

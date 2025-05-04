@@ -67,7 +67,12 @@ class ArticuloViewController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Admin/AñadirArticulo');
+        // Obtener todas las tallas disponibles
+        $todasLasTallas = \App\Models\Tallas::all();
+
+        return Inertia::render('Admin/AñadirArticulo', [
+            'todasLasTallas' => $todasLasTallas
+        ]);
     }
 
     /**
@@ -81,7 +86,10 @@ class ArticuloViewController extends Controller
             'categoria_id' => ['required', 'string'],
             'descripcion' => ['required', 'string'],
             'descripcion_short' => ['required', 'string'],
-            'precio' => ['required', 'min:0', 'max:9999.99', 'numeric']
+            'precio' => ['required', 'min:0', 'max:9999.99', 'numeric'],
+            'tallas' => ['nullable', 'array'],
+            'tallas.*.id' => ['required', 'exists:tallas,id'],
+            'tallas.*.stock' => ['required', 'integer', 'min:0']
         ]);
 
         $articulo = Articulo::create([
@@ -94,6 +102,20 @@ class ArticuloViewController extends Controller
 
         if ($request->categoria_id) {
             $articulo->categoria()->sync([$request->categoria_id]);
+        }
+
+        // Asignar tallas y stock
+        if (isset($validated['tallas']) && is_array($validated['tallas'])) {
+            $tallasData = [];
+            foreach ($validated['tallas'] as $talla) {
+                if (isset($talla['id']) && isset($talla['stock'])) {
+                    $tallasData[$talla['id']] = ['stock' => $talla['stock']];
+                }
+            }
+
+            if (!empty($tallasData)) {
+                $articulo->tallas()->sync($tallasData);
+            }
         }
 
         if ($request->hasFile('imagen')) {
@@ -118,6 +140,7 @@ class ArticuloViewController extends Controller
     {
         $articulo->load('imagenes');
         $articulo->load('categoria');
+        $articulo->load('tallas'); // Cargar las tallas del artículo
 
         $esFavorito = false;
 
@@ -143,8 +166,15 @@ class ArticuloViewController extends Controller
      */
     public function edit(Articulo $articulo)
     {
+        // Cargar también las tallas del artículo y todas las tallas disponibles
+        $articulo->load(['imagenes', 'categoria', 'tallas']);
+
+        // Obtener todas las tallas disponibles
+        $todasLasTallas = \App\Models\Tallas::all();
+
         return Inertia::render('Admin/EditarArticulo', [
-            'articulo' => $articulo->load(['imagenes', 'categoria'])
+            'articulo' => $articulo,
+            'todasLasTallas' => $todasLasTallas
         ]);
     }
 
@@ -163,8 +193,13 @@ class ArticuloViewController extends Controller
             'nuevas_imagenes.*' => 'nullable|image|max:2048',
             'imagenes_a_eliminar' => 'nullable|array',
             'imagenes_a_eliminar.*' => 'exists:imagenes,id',
+            'tallas' => 'nullable|array',
+            'tallas.*.id' => 'required|exists:tallas,id',
+            'tallas.*.stock' => 'required|integer|min:0',
         ]);
+
         $disk = Storage::disk('gcs');
+
         // Actualizar datos básicos del artículo
         $articulo->update([
             'nombre' => $validated['nombre'],
@@ -176,6 +211,20 @@ class ArticuloViewController extends Controller
 
         if ($request->categoria_id) {
             $articulo->categoria()->sync([$request->categoria_id]);
+        }
+
+        // Actualizar tallas y stock
+        if (isset($validated['tallas']) && is_array($validated['tallas'])) {
+            // Preparar los datos para sync
+            $tallasData = [];
+            foreach ($validated['tallas'] as $talla) {
+                if (isset($talla['id']) && isset($talla['stock'])) {
+                    $tallasData[$talla['id']] = ['stock' => $talla['stock']];
+                }
+            }
+
+            // Sincronizar tallas con sus valores de stock en la tabla pivote
+            $articulo->tallas()->sync($tallasData);
         }
 
         // Eliminar imágenes marcadas para eliminar
