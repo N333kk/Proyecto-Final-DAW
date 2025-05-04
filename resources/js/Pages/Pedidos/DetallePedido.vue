@@ -114,6 +114,7 @@ const calcularTotal = (items) => {
                             <thead class="bg-gray-50 dark:bg-gray-800/70">
                                 <tr>
                                     <th scope="col" class="py-3.5 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Artículo</th>
+                                    <th scope="col" class="py-3.5 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Talla</th>
                                     <th scope="col" class="py-3.5 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Precio Unitario</th>
                                     <th scope="col" class="py-3.5 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cantidad</th>
                                     <th scope="col" class="py-3.5 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Subtotal</th>
@@ -140,6 +141,12 @@ const calcularTotal = (items) => {
                                             </div>
                                         </div>
                                     </td>
+                                    <td class="py-4 px-4 text-sm text-gray-900 dark:text-gray-200 font-medium">
+                                        <div v-if="item.talla" class="px-2 py-1 inline-block bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-medium rounded-md">
+                                            {{ item.talla }}
+                                        </div>
+                                        <span v-else class="text-gray-500 dark:text-gray-400">No aplica</span>
+                                    </td>
                                     <td class="py-4 px-4 text-sm text-gray-900 dark:text-gray-200 font-medium">{{ item.precio }} €</td>
                                     <td class="py-4 px-4 text-sm text-gray-900 dark:text-gray-200">{{ item.cantidad }}</td>
                                     <td class="py-4 px-4 text-sm font-semibold text-purple-600 dark:text-purple-400">{{ (item.precio * item.cantidad).toFixed(2) }} €</td>
@@ -147,7 +154,7 @@ const calcularTotal = (items) => {
                             </tbody>
                             <tfoot>
                                 <tr class="bg-gray-50 dark:bg-gray-800/70">
-                                    <td colspan="3" class="py-4 px-4 text-sm font-semibold text-right text-gray-900 dark:text-white">Total:</td>
+                                    <td colspan="4" class="py-4 px-4 text-sm font-semibold text-right text-gray-900 dark:text-white">Total:</td>
                                     <td class="py-4 px-4 text-lg font-bold text-purple-700 dark:text-purple-400">{{ calcularTotal(pedido.articulos_pedido).toFixed(2) }} €</td>
                                 </tr>
                             </tfoot>

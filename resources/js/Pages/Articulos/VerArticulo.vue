@@ -19,6 +19,46 @@ const props = defineProps({
 
 // Usamos un ref para poder cambiar su estado reactivamente cuando el usuario hace clic
 const esFavoritoActual = ref(props.esFavorito);
+const selectedTallaId = ref(null); // Variable para almacenar la talla seleccionada
+const tallaError = ref(''); // Variable para mostrar mensajes de error
+
+// Mostrar mensaje si no hay tallas disponibles o con stock
+const hayTallasDisponibles = computed(() => {
+    if (!props.articulo.tallas || props.articulo.tallas.length === 0) return false;
+    return props.articulo.tallas.some(talla => talla.pivot.stock > 0);
+});
+
+// Función para añadir al carrito con talla seleccionada
+const addToCart = () => {
+    // Validar que se ha seleccionado una talla
+    if (!selectedTallaId.value) {
+        tallaError.value = 'Por favor, selecciona una talla';
+        return;
+    }
+
+    // Validar que la talla seleccionada tiene stock
+    const tallaSeleccionada = props.articulo.tallas.find(t => t.id === selectedTallaId.value);
+    if (!tallaSeleccionada || tallaSeleccionada.pivot.stock <= 0) {
+        tallaError.value = 'Esta talla no está disponible';
+        return;
+    }
+
+    // Enviar al servidor con la talla seleccionada
+    router.post(route('cart.store', { id: props.articulo.id }), {
+        talla_id: selectedTallaId.value
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Limpiar mensaje de error y talla seleccionada después de añadir exitosamente
+            tallaError.value = '';
+            selectedTallaId.value = null;
+        },
+        onError: (errors) => {
+            // Mostrar error de validación
+            tallaError.value = errors.talla_id || 'Ha ocurrido un error';
+        }
+    });
+};
 
 const toggleFavorito = () => {
     // Actualización optimista: cambiamos el estado visual inmediatamente
@@ -36,6 +76,55 @@ const toggleFavorito = () => {
         }
     });
 };
+
+// Función para formatear la descripción, incluyendo soporte para
+// párrafos, listas, negritas y otros formatos básicos
+const formatearDescripcion = computed(() => {
+    if (!props.articulo.descripcion) return 'Este producto no tiene descripción.';
+
+    let descripcion = props.articulo.descripcion;
+
+    // Paso 1: Escapar HTML para prevenir inyecciones
+    const escapeHTML = (unsafe) => {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    };
+
+    descripcion = escapeHTML(descripcion);
+
+    // Paso 2: Convertir saltos de línea en párrafos HTML
+    descripcion = descripcion
+        .split('\n\n')
+        .map(p => p.trim())
+        .filter(p => p.length > 0)
+        .map(p => `<p>${p}</p>`)
+        .join('');
+
+    // Paso 3: Convertir saltos de línea simples en <br>
+    descripcion = descripcion.replace(/\n/g, '<br>');
+
+    // Paso 4: Formatear listas (si comienzan con - o *)
+    descripcion = descripcion.replace(/<p>(\s*[-*]\s+.*?)<\/p>/gs, (match, list) => {
+        const items = list.split(/\n(?=\s*[-*]\s+)/g);
+        return '<ul class="list-disc pl-5 my-2">' +
+            items.map(item => `<li>${item.replace(/^\s*[-*]\s+/, '')}</li>`).join('') +
+            '</ul>';
+    });
+
+    // Paso 5: Formato para negritas con ** o __
+    descripcion = descripcion.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    descripcion = descripcion.replace(/__(.*?)__/g, '<strong>$1</strong>');
+
+    // Paso 6: Formato para cursiva con * o _
+    descripcion = descripcion.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    descripcion = descripcion.replace(/_(.*?)_/g, '<em>$1</em>');
+
+    return descripcion;
+});
 
 const isFullUrl = (url) => {
     return url && (url.startsWith('http://') || url.startsWith('https://'));
@@ -70,13 +159,11 @@ const responsiveOptions = ref([
     }
 ]);
 
-// Calculamos el precio con descuento
 const precioConDescuento = computed(() => {
     if (props.articulo.descuento && props.articulo.descuento > 0) {
-        const descuento = props.articulo.precio * (props.articulo.descuento / 100);
-        return (props.articulo.precio - descuento).toFixed(2);
+        return (props.articulo.precio * (1 - props.articulo.descuento / 100)).toFixed(2);
     }
-    return null;
+    return props.articulo.precio.toFixed(2);
 });
 
 </script>
@@ -151,9 +238,9 @@ const precioConDescuento = computed(() => {
                                     </svg>
                                     Descripción del producto
                                 </h2>
-                                <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                                    {{ articulo.descripcion || 'Este producto no tiene descripción.' }}
-                                </p>
+                                <div class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed article-content"
+                                     v-html="formatearDescripcion">
+                                </div>
                             </div>
 
                             <div class="mt-auto">
@@ -175,22 +262,54 @@ const precioConDescuento = computed(() => {
                                         {{ articulo.precio }} €
                                     </p>
 
-                                    <p class="text-sm text-green-600 dark:text-green-400 mt-1">✓ En stock</p>
+                                    <p v-if="hayTallasDisponibles" class="text-sm text-green-600 dark:text-green-400 mt-1">
+                                        ✓ En stock
+                                    </p>
+                                    <p v-else class="text-sm text-red-600 dark:text-red-400 mt-1">
+                                        ✕ Sin stock disponible
+                                    </p>
+                                </div>
+
+                                <!-- Selector de tallas -->
+                                <div class="mb-6">
+                                    <h3 class="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
+                                        Selecciona tu talla
+                                    </h3>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button
+                                            v-for="talla in articulo.tallas"
+                                            :key="talla.id"
+                                            @click="selectedTallaId = talla.id"
+                                            :disabled="talla.pivot.stock <= 0"
+                                            :class="[
+                                                'px-4 py-2 border rounded-md transition-colors font-medium',
+                                                selectedTallaId === talla.id ? 'bg-purple-600 text-white border-purple-600' : 'border-gray-300',
+                                                talla.pivot.stock <= 0 ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-500' : 'hover:border-purple-300'
+                                            ]"
+                                        >
+                                            {{ talla.talla }}
+                                            <span v-if="talla.pivot.stock <= 0" class="text-xs ml-1">(Agotada)</span>
+                                        </button>
+                                    </div>
+                                    <p v-if="tallaError" class="text-red-500 text-sm mt-2">{{ tallaError }}</p>
                                 </div>
 
                                 <div class="flex flex-col sm:flex-row gap-3">
-                                    <Link
-                                        :href="route('cart.store', { id: articulo.id })"
-                                        method="post"
-                                        as="button"
-                                        type="button"
-                                        class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 shadow-sm hover:shadow flex items-center justify-center"
+                                    <button
+                                        @click="addToCart"
+                                        :disabled="!hayTallasDisponibles"
+                                        :class="[
+                                            'flex-1 font-semibold py-3 px-4 rounded-lg transition-all duration-300 shadow-sm hover:shadow flex items-center justify-center',
+                                            hayTallasDisponibles ?
+                                                'bg-purple-600 hover:bg-purple-700 text-white' :
+                                                'bg-gray-400 cursor-not-allowed text-white'
+                                        ]"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                                         </svg>
                                         Añadir al carrito
-                                    </Link>
+                                    </button>
 
                                     <Link
                                         v-if="$page.props.auth.user"
@@ -324,5 +443,72 @@ const precioConDescuento = computed(() => {
 
 .carousel__slide:hover img {
     transform: scale(1.03);
+}
+
+/* Estilos adicionales para el contenido HTML */
+.article-content h1, .article-content h2, .article-content h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.article-content h1 {
+    font-size: 1.5rem;
+}
+
+.article-content h2 {
+    font-size: 1.25rem;
+}
+
+.article-content h3 {
+    font-size: 1.125rem;
+}
+
+.article-content p {
+    margin-bottom: 1rem;
+}
+
+.article-content ul, .article-content ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.article-content ul {
+    list-style-type: disc;
+}
+
+.article-content ol {
+    list-style-type: decimal;
+}
+
+.article-content a {
+    color: #8b5cf6;
+    text-decoration: underline;
+}
+
+.article-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+}
+
+.article-content th, .article-content td {
+    border: 1px solid #e5e7eb;
+    padding: 0.5rem;
+}
+
+.article-content blockquote {
+    border-left: 4px solid #8b5cf6;
+    padding-left: 1rem;
+    font-style: italic;
+    margin-bottom: 1rem;
+}
+
+.dark .article-content a {
+    color: #a78bfa;
+}
+
+.dark .article-content th, .dark .article-content td {
+    border-color: #374151;
 }
 </style>

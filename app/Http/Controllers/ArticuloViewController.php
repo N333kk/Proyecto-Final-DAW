@@ -155,7 +155,7 @@ class ArticuloViewController extends Controller
         $articulo = $articulo->toArray();
         $articulo['descuento'] = $articulo['descuento'] ?? 0;
 
-        return Inertia::render('Tienda/VerArticulo', [
+        return Inertia::render('Articulos/VerArticulo', [
             'articulo' => $articulo,
             'esFavorito' => $esFavorito
         ]);

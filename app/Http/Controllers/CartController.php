@@ -20,7 +20,7 @@ class CartController extends Controller
         $cart = Cart::firstOrCreate([
             'user_id' => $user->id
         ]);
-        $cartItems = CartItem::with(['articulo.imagenes'])->where('cart_id', $cart->id)->get();
+        $cartItems = CartItem::with(['articulo.imagenes', 'talla'])->where('cart_id', $cart->id)->get();
 
         return Inertia::render('Cart/Index', [
             'cartItems' => $cartItems,

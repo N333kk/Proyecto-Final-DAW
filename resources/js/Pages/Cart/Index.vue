@@ -248,7 +248,7 @@ const cartItemCount = computed(() => {
 
                                     <!-- Mostrar la talla -->
                                     <div v-if="item.talla" class="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md">
-                                        Talla: {{ item.talla.nombre }}
+                                        Talla: {{ item.talla.talla }}
                                     </div>
 
                                     <!-- Precio con descuento aplicado -->
@@ -411,7 +411,7 @@ const cartItemCount = computed(() => {
                                         Talla seleccionada
                                     </h3>
                                     <div class="inline-block px-4 py-2 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-medium rounded-lg">
-                                        {{ selectedItem.talla.nombre }}
+                                        {{ selectedItem.talla.talla }}
                                     </div>
                                 </div>
 

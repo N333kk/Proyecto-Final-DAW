@@ -54,13 +54,34 @@ class PedidoViewController extends Controller
         $pedido->user_id = Auth::id();
         $pedido->save();
 
-        $cartItems = CartItem::where('user_id', Auth::id())->get();
+        // Obtener los ítems del carrito del usuario
+        $cartItems = CartItem::where('cart_id', function ($query) {
+            $query->select('id')
+                ->from('carts')
+                ->where('user_id', Auth::id());
+        })->get();
 
         foreach ($cartItems as $cartItem) {
-            $pedido->articulos()->attach($cartItem->articulo_id, ['cantidad' => $cartItem->cantidad]);
+            // Calcular precio con descuento si existe
+            $precioUnitario = $cartItem->articulo->precio;
+            if (!empty($cartItem->articulo->descuento) && $cartItem->articulo->descuento > 0) {
+                $precioUnitario = $precioUnitario * (1 - ($cartItem->articulo->descuento / 100));
+            }
+
+            // Guardar el artículo en el pedido con su precio y talla
+            $pedido->articulos()->attach($cartItem->articulo_id, [
+                'cantidad' => $cartItem->cantidad,
+                'precio' => round($precioUnitario, 2),
+                'talla_id' => $cartItem->talla_id // Guardar el ID de la talla
+            ]);
         }
 
-        CartItem::where('user_id', Auth::id())->delete();
+        // Vaciar el carrito del usuario
+        CartItem::where('cart_id', function ($query) {
+            $query->select('id')
+                ->from('carts')
+                ->where('user_id', Auth::id());
+        })->delete();
 
         return redirect()->route('tienda')->with('success', 'Pedido creado exitosamente.');
     }
@@ -93,11 +114,19 @@ class PedidoViewController extends Controller
 
         // Transformar la relación pivot para obtener los datos necesarios
         $articulosPedido = $pedido->articulos->map(function ($articulo) {
+            // Obtener la talla si existe
+            $talla = null;
+            if ($articulo->pivot->talla_id) {
+                $talla = \App\Models\Tallas::find($articulo->pivot->talla_id);
+            }
+
             return [
                 'id' => $articulo->id,
                 'articulo' => $articulo,
                 'cantidad' => $articulo->pivot->cantidad,
                 'precio' => $articulo->pivot->precio ?: $articulo->precio, // Si no hay precio en el pivot, usar el precio actual
+                'talla' => $talla ? $talla->talla : null, // Incluir el nombre de la talla
+                'talla_id' => $articulo->pivot->talla_id
             ];
         });
 
