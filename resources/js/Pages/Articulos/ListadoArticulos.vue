@@ -53,8 +53,66 @@ const props = defineProps({
 // Variable reactiva para manejar los favoritos (inicializada con los props)
 const favoritosLocales = ref(props.articulosFavoritos || []);
 
-const addToCart = (articuloId) => {
-    router.post('/cart/' + articuloId, { cantidad: 1 });
+// Variables para el modal de selección de talla
+const showTallaModal = ref(false);
+const currentArticulo = ref(null);
+const selectedTallaId = ref(null);
+const tallaError = ref('');
+
+const addToCart = (articulo) => {
+    // Guardar el artículo seleccionado
+    currentArticulo.value = articulo;
+    selectedTallaId.value = null;
+    tallaError.value = '';
+
+    // Si el artículo no tiene tallas, mostrar un error
+    if (!articulo.tallas || articulo.tallas.length === 0) {
+        alert('Este producto no tiene tallas disponibles');
+        return;
+    }
+
+    // Si solo hay una talla disponible con stock, seleccionarla automáticamente
+    const tallasConStock = articulo.tallas.filter(talla => talla.pivot.stock > 0);
+    if (tallasConStock.length === 1) {
+        selectedTallaId.value = tallasConStock[0].id;
+        confirmarAddToCart();
+        return;
+    }
+
+    // Mostrar el modal para seleccionar talla
+    showTallaModal.value = true;
+};
+
+// Función para confirmar y añadir al carrito con la talla seleccionada
+const confirmarAddToCart = () => {
+    // Validar que se ha seleccionado una talla
+    if (!selectedTallaId.value) {
+        tallaError.value = 'Por favor, selecciona una talla';
+        return;
+    }
+
+    // Enviar petición con la talla seleccionada
+    router.post('/cart/' + currentArticulo.value.id, {
+        talla_id: selectedTallaId.value
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Cerrar el modal y limpiar la selección
+            showTallaModal.value = false;
+            selectedTallaId.value = null;
+            tallaError.value = '';
+        },
+        onError: (errors) => {
+            tallaError.value = errors.talla_id || 'Ha ocurrido un error';
+        }
+    });
+};
+
+// Función para cerrar el modal
+const closeTallaModal = () => {
+    showTallaModal.value = false;
+    selectedTallaId.value = null;
+    tallaError.value = '';
 };
 
 const addToFavorites = (articuloId) => {
@@ -108,6 +166,56 @@ const calcularPrecioConDescuento = (precio, descuento) => {
     <div class="bg-gray-50 text-gray-800 dark:bg-black dark:text-white min-h-screen">
         <div class="flex flex-col items-center justify-center selection:bg-purple-500 selection:text-white dark:selection:bg-[#FF2D20]">
             <Navbar />
+
+            <!-- Modal de selección de talla -->
+            <div v-if="showTallaModal && currentArticulo"
+                 class="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg max-w-md w-full mx-4">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                        Selecciona una talla
+                    </h3>
+
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        Para añadir "{{ currentArticulo.nombre }}" al carrito, necesitas seleccionar una talla.
+                    </p>
+
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <button
+                            v-for="talla in currentArticulo.tallas"
+                            :key="talla.id"
+                            @click="selectedTallaId = talla.id"
+                            :disabled="talla.pivot.stock <= 0"
+                            :class="[
+                                'px-4 py-2 border rounded-md transition-colors font-medium',
+                                selectedTallaId === talla.id ? 'bg-purple-600 text-white border-purple-600' : 'border-gray-300',
+                                talla.pivot.stock <= 0 ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-500' : 'hover:border-purple-300'
+                            ]"
+                        >
+                            {{ talla.talla }}
+                            <span v-if="talla.pivot.stock <= 0" class="text-xs ml-1">(Agotada)</span>
+                        </button>
+                    </div>
+
+                    <div v-if="tallaError" class="text-red-500 text-sm mb-4">
+                        {{ tallaError }}
+                    </div>
+
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button
+                            @click="closeTallaModal"
+                            class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors text-gray-700 dark:border-gray-600 dark:hover:bg-gray-700 dark:text-white"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            @click="confirmarAddToCart"
+                            class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors"
+                        >
+                            Añadir al carrito
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <div class="">
                 <div class="py-4 border-b w-full border-b-gray-200 dark:border-b-white/20 bg-gradient-to-r from-purple-50 to-transparent dark:from-purple-900/10 dark:to-transparent flex justify-between items-center">
@@ -234,7 +342,7 @@ const calcularPrecioConDescuento = (precio, descuento) => {
                                     </template>
 
                                     <!-- Botón para añadir al carrito (1/3 del ancho) -->
-                                    <button @click="addToCart(articulo.id)"
+                                    <button @click="addToCart(articulo)"
                                         class="flex-1 bg-purple-500 hover:bg-purple-600 dark:bg-blue-500/90 dark:hover:bg-blue-500 text-white font-semibold py-2 px-2 rounded-md transition-colors flex items-center justify-center shadow-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />

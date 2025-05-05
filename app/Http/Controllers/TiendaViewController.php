@@ -13,7 +13,7 @@ class TiendaViewController extends Controller
     public function index()
     {
         return Inertia::render('Tienda/PrincipalTienda', [
-            'articulos' => Articulo::with(['imagenes'])->orderBy('id', 'desc')->take(4)->get(),
+            'articulos' => Articulo::with(['imagenes', 'categoria', 'tallas'])->orderBy('id', 'desc')->take(4)->get(),
             'categorias' => Categoria::with('subcategorias')->whereNull('categoria_padre_id')->get()
         ]);
     }

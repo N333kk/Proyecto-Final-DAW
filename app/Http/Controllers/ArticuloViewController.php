@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Articulo;
 use App\Models\Imagen;
 use App\Models\Categoria;
+use App\Models\Tallas;
+use App\Models\TallaArticulo;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -18,7 +20,7 @@ class ArticuloViewController extends Controller
     {
         $categoriaId = $request->query('categoria');
 
-        $query = Articulo::with(['imagenes', 'categoria']);
+        $query = Articulo::with(['imagenes', 'categoria', 'tallas']);
 
         if ($categoriaId) {
             // Obtener la categoría seleccionada
@@ -45,6 +47,8 @@ class ArticuloViewController extends Controller
 
         $articulos = $query->get();
 
+        $tallas = $tallas = Tallas::all();
+
         // Obtener todas las categorías para el menú desplegable
         $categorias = Categoria::with('subcategorias')->whereNull('categoria_padre_id')->get();
 
@@ -68,7 +72,7 @@ class ArticuloViewController extends Controller
     public function create()
     {
         // Obtener todas las tallas disponibles
-        $todasLasTallas = \App\Models\Tallas::all();
+        $todasLasTallas = Tallas::all();
 
         return Inertia::render('Admin/AñadirArticulo', [
             'todasLasTallas' => $todasLasTallas

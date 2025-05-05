@@ -64,11 +64,13 @@ class CartController extends Controller
             ]);
         }
 
-        if ($request->ajax()) {
+        // Para solicitudes XHR que no son solicitudes Inertia, devolver JSON
+        if ($request->ajax() && !$request->header('X-Inertia')) {
             return response()->json(['success' => true]);
         }
 
-        return redirect()->route('cart.show');
+        // Para solicitudes Inertia, devolver una respuesta Inertia adecuada
+        return redirect()->back();
     }
 
     public function update(Request $request, $id)
@@ -96,11 +98,13 @@ class CartController extends Controller
             }
         }
 
-        if ($request->ajax()) {
+        // Para solicitudes XHR que no son solicitudes Inertia, devolver JSON
+        if ($request->ajax() && !$request->header('X-Inertia')) {
             return response()->json(['success' => true]);
         }
 
-        return redirect()->route('cart.show');
+        // Para solicitudes Inertia, devolver una respuesta Inertia adecuada
+        return redirect()->back();
     }
 
     public function removeFromCart(Request $request, $id)
@@ -108,25 +112,27 @@ class CartController extends Controller
         $user = Auth::user();
         $cart = Cart::where('user_id', $user->id)->first();
 
-        if ($request->has('talla_id')) {
-            // Si especificamos una talla, eliminamos solo ese item específico
-            $cartItem = CartItem::where('cart_id', $cart->id)
-                ->where('articulo_id', $id)
-                ->where('talla_id', $request->talla_id)
-                ->firstOrFail();
+        // Requerir siempre la talla_id para eliminar un artículo específico
+        $request->validate([
+            'talla_id' => 'required|exists:tallas,id',
+        ]);
 
+        // Eliminamos solo el item del artículo con la talla específica
+        $cartItem = CartItem::where('cart_id', $cart->id)
+            ->where('articulo_id', $id)
+            ->where('talla_id', $request->talla_id)
+            ->first();
+
+        if ($cartItem) {
             $cartItem->delete();
-        } else {
-            // Si no especificamos talla, eliminamos todos los items de ese artículo
-            CartItem::where('cart_id', $cart->id)
-                ->where('articulo_id', $id)
-                ->delete();
         }
 
-        if ($request->ajax()) {
+        // Para solicitudes XHR que no son solicitudes Inertia, devolver JSON
+        if ($request->ajax() && !$request->header('X-Inertia')) {
             return response()->json(['success' => true]);
         }
 
+        // Para solicitudes Inertia, devolver una respuesta Inertia adecuada
         return redirect()->back()->with('success', 'Artículo eliminado del carrito.');
     }
 
