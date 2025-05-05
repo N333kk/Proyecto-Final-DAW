@@ -244,7 +244,7 @@ onMounted(() => {
                             <h2 class="text-3xl font-bold text-center mb-8 text-gray-800 dark:text-white">Productos Destacados</h2>
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                                 <div v-for="articulo in articulos" :key="articulo.id"
-                                     class="bg-white dark:bg-gray-800/80 rounded-lg shadow-sm hover:shadow-md border border-gray-200 dark:border-transparent overflow-hidden transition-all hover:scale-102 duration-300">
+                                     class="bg-white dark:bg-gray-800/80 rounded-lg shadow-sm hover:shadow-md border border-gray-200 dark:border-transparent overflow-hidden transition-all hover:scale-102 duration-300" id="articulo-card">
                                     <img v-if="articulo.imagenes && articulo.imagenes.length > 0"
                                          :src="articulo.imagenes[0].ruta"
                                          :alt="articulo.nombre"
