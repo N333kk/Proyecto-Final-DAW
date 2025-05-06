@@ -28,7 +28,7 @@ class PedidoViewController extends Controller
 
         return Inertia::render('Pedidos/ListadoPedidos', [
             'pedidos' => $filteredPedidos,
-            'usuarios' => $usuariosConPedidos,
+            'usuarios' => $usuariosConPedidos
         ]);
     }
 
