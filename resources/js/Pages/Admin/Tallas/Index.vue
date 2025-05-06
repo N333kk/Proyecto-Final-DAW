@@ -1,5 +1,5 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link, Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -26,6 +26,7 @@ if (props.flash && props.flash.error) {
 </script>
 
 <template>
+    <Head title="Tallas" />
     <div class="min-h-screen bg-zinc-900 text-white p-8">
         <div class="max-w-6xl mx-auto">
             <div class="flex justify-between items-center mb-6">

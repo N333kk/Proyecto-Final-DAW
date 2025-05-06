@@ -1,5 +1,5 @@
 <script setup>
-import { useForm, Link } from '@inertiajs/vue3';
+import { useForm, Link, Head } from '@inertiajs/vue3';
 
 const props = defineProps({
     talla: Object,
@@ -16,6 +16,8 @@ const submit = () => {
 </script>
 
 <template>
+    <Head title="Editar talla" />
+
     <div class="min-h-screen bg-zinc-900 text-white p-8">
         <div class="max-w-md mx-auto">
             <h1 class="text-2xl font-bold mb-6">Editar Talla</h1>

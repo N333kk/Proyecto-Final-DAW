@@ -44,6 +44,20 @@ class CartController extends Controller
             'talla_id.exists' => 'La talla seleccionada no es válida',
         ]);
 
+        // Verificar que la talla seleccionada pertenece a este artículo y tiene stock
+        $articuloTalla = \DB::table('articulo_tallas')
+            ->where('articulo_id', $id)
+            ->where('talla_id', $request->talla_id)
+            ->first();
+
+        if (!$articuloTalla) {
+            return response()->json(['error' => 'Esta talla no está disponible para este artículo'], 422);
+        }
+
+        if ($articuloTalla->stock <= 0) {
+            return response()->json(['error' => 'No hay stock disponible para esta talla'], 422);
+        }
+
         // Verificamos si existe el artículo con la talla específica en el carrito
         $cartItem = CartItem::where('cart_id', $cart->id)
             ->where('articulo_id', $id)
@@ -51,6 +65,11 @@ class CartController extends Controller
             ->first();
 
         if ($cartItem) {
+            // Verificar que no exceda el stock disponible
+            if ($cartItem->cantidad + 1 > $articuloTalla->stock) {
+                return response()->json(['error' => 'No hay suficiente stock disponible'], 422);
+            }
+
             // Si ya existe este artículo con la misma talla, incrementamos la cantidad
             $cartItem->increment('cantidad', 1);
         } else {
@@ -84,6 +103,16 @@ class CartController extends Controller
         $request->validate([
             'talla_id' => 'required|exists:tallas,id',
         ]);
+
+        // Verificar que la talla seleccionada pertenece a este artículo
+        $articuloTalla = \DB::table('articulo_tallas')
+            ->where('articulo_id', $id)
+            ->where('talla_id', $request->talla_id)
+            ->first();
+
+        if (!$articuloTalla) {
+            return response()->json(['error' => 'Esta talla no está disponible para este artículo'], 422);
+        }
 
         $cartItem = CartItem::where('cart_id', $cart->id)
             ->where('articulo_id', $id)

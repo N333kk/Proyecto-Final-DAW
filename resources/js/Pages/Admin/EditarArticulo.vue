@@ -1,5 +1,5 @@
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import { useForm, Head } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 
 const props = defineProps({
@@ -130,7 +130,7 @@ const submitForm = () => {
 </script>
 
 <template>
-
+<Head title="Editar Articulo" />
 <div class="min-h-screen p-8 min-w-screen bg-zinc-900 text-white flex items-center flex-col">
         <div class="px-16 py-8 bg-gradient-to-b from-zinc-700 to-zinc-500 border rounded-xl border-slate-400 text-white flex items-center flex-col">
 
