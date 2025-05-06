@@ -165,7 +165,7 @@ const calcularPrecioConDescuento = (precio, descuento) => {
 <Head title="Articulos" />
     <div class="bg-gray-50 text-gray-800 dark:bg-black dark:text-white min-h-screen">
         <div class="flex flex-col items-center justify-center selection:bg-purple-500 selection:text-white dark:selection:bg-[#FF2D20]">
-            <Navbar />
+            <Navbar :categorias="categorias" :categoriaSeleccionada="categoriaSeleccionada" />
 
             <!-- Modal de selección de talla -->
             <div v-if="showTallaModal && currentArticulo"
@@ -209,7 +209,7 @@ const calcularPrecioConDescuento = (precio, descuento) => {
                         </button>
                         <button
                             @click="confirmarAddToCart"
-                            class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors"
+                            class="confirmar-talla px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors"
                         >
                             Añadir al carrito
                         </button>
@@ -234,7 +234,7 @@ const calcularPrecioConDescuento = (precio, descuento) => {
                 <!-- Grid responsivo con distribución específica de columnas -->
                 <div class="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
                     <!-- Tarjetas con tamaño dinámico que se adaptan al contenedor -->
-                    <div class="rounded-xl transition-all w-full relative group overflow-hidden shadow-sm hover:shadow-xl border border-gray-200 dark:border-gray-700/30 bg-white dark:bg-gray-800/40 hover:scale-[1.02] duration-300"
+                    <div class="articulo-card rounded-xl transition-all w-full relative group overflow-hidden shadow-sm hover:shadow-xl border border-gray-200 dark:border-gray-700/30 bg-white dark:bg-gray-800/40 hover:scale-[1.02] duration-300"
                          v-for="articulo in articulos"
                          :key="articulo.id">
 
@@ -343,7 +343,7 @@ const calcularPrecioConDescuento = (precio, descuento) => {
 
                                     <!-- Botón para añadir al carrito (1/3 del ancho) -->
                                     <button @click="addToCart(articulo)"
-                                        class="flex-1 bg-purple-500 hover:bg-purple-600 dark:bg-blue-500/90 dark:hover:bg-blue-500 text-white font-semibold py-2 px-2 rounded-md transition-colors flex items-center justify-center shadow-sm">
+                                        class="añadir-carrito flex-1 bg-purple-500 hover:bg-purple-600 dark:bg-blue-500/90 dark:hover:bg-blue-500 text-white font-semibold py-2 px-2 rounded-md transition-colors flex items-center justify-center shadow-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                                         </svg>

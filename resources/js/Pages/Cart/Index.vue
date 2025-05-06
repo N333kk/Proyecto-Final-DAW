@@ -210,9 +210,16 @@ const cartItemCount = computed(() => {
     <div class="bg-gray-50 text-gray-800 dark:bg-black dark:text-white min-h-screen">
         <div
             class="flex flex-col items-start justify-center selection:bg-purple-500 selection:text-white dark:selection:bg-[#FF2D20]">
+            class="flex flex-col items-start justify-center selection:bg-purple-500 selection:text-white dark:selection:bg-[#FF2D20]">
             <Navbar :cart-items-count="cartItemCount" />
 
             <div
+                class="px-8 flex flex-row min-w-full border-b border-gray-300 dark:border-white/20 bg-gradient-to-r from-purple-100 to-transparent dark:from-purple-900/10">
+                <h2 class="pt-6 pb-6 font-extrabold text-4xl text-gray-800 dark:text-white flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-10 h-10 mr-3 text-purple-600">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                 class="px-8 flex flex-row min-w-full border-b border-gray-300 dark:border-white/20 bg-gradient-to-r from-purple-100 to-transparent dark:from-purple-900/10">
                 <h2 class="pt-6 pb-6 font-extrabold text-4xl text-gray-800 dark:text-white flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -228,8 +235,10 @@ const cartItemCount = computed(() => {
                 <!-- Columna izquierda con los items del carrito - más estrecha en desktop -->
                 <div
                     class="w-full md:w-2/5 p-4 md:p-6 border-r border-gray-300 dark:border-white/20 bg-gradient-to-b from-purple-50 to-transparent dark:from-purple-900/5">
+                    class="w-full md:w-2/5 p-4 md:p-6 border-r border-gray-300 dark:border-white/20 bg-gradient-to-b from-purple-50 to-transparent dark:from-purple-900/5">
                     <div v-if="localCartItems.length > 0" class="space-y-4">
                         <!-- Elementos del carrito con efecto hover y selección -->
+                        <div v-for="item in localCartItems" :key="item.id" @click="seleccionarArticulo(item)"
                         <div v-for="item in localCartItems" :key="item.id" @click="seleccionarArticulo(item)"
                             class="bg-white dark:bg-gray-800/40 py-3 px-4 rounded-xl shadow-sm hover:shadow-md flex text-gray-800 dark:text-white border border-transparent transition-all duration-300 cursor-pointer"
                             :class="selectedItem &&
@@ -239,10 +248,24 @@ const cartItemCount = computed(() => {
                                     : 'hover:border-purple-200 hover:bg-purple-50 dark:hover:bg-gray-800/50'
                                 ">
                             <div class="flex-shrink-0 flex flex-col items-center justify-center ml-1">
+                                ">
+                            <div class="flex-shrink-0 flex flex-col items-center justify-center ml-1">
                                 <div
                                     class="relative w-14 h-14 overflow-hidden rounded-lg shadow-inner bg-gray-100 dark:bg-gray-700">
                                     <img class="w-full h-full object-cover" :src="item.articulo.imagenes &&
+                                    class="relative w-14 h-14 overflow-hidden rounded-lg shadow-inner bg-gray-100 dark:bg-gray-700">
+                                    <img class="w-full h-full object-cover" :src="item.articulo.imagenes &&
                                             item.articulo.imagenes.length > 0
+                                            ? isFullUrl(
+                                                item.articulo.imagenes[0]
+                                                    .ruta
+                                            )
+                                                ? item.articulo.imagenes[0]
+                                                    .ruta
+                                                : `/storage/${item.articulo.imagenes[0].ruta}`
+                                            : '/img/placeholder.webp'
+                                        " alt="Imagen Articulo" />
+                                    <div class="absolute inset-0 bg-gradient-to-tr from-black/10 to-transparent"></div>
                                             ? isFullUrl(
                                                 item.articulo.imagenes[0]
                                                     .ruta
@@ -259,8 +282,15 @@ const cartItemCount = computed(() => {
                             <div class="ml-4 flex-grow">
                                 <div class="flex justify-between">
                                     <h2 class="text-base font-semibold text-gray-900 dark:text-white">
+                                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">
                                         {{ item.articulo.nombre }}
                                     </h2>
+                                    <button @click.stop="eliminarDelCarrito(item)"
+                                        class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 p-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
                                     <button @click.stop="eliminarDelCarrito(item)"
                                         class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 p-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
@@ -285,7 +315,16 @@ const cartItemCount = computed(() => {
                                         </button>
 
                                         <span class="px-3 py-1 text-gray-800 dark:text-white">{{ item.cantidad }}</span>
+                                        <span class="px-3 py-1 text-gray-800 dark:text-white">{{ item.cantidad }}</span>
 
+                                        <button @click.stop="
+                                            incrementarCantidad(item)
+                                            " type="button"
+                                            class="flex items-center justify-center h-6 w-6 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 4v16m8-8H4" />
                                         <button @click.stop="
                                             incrementarCantidad(item)
                                             " type="button"
@@ -301,11 +340,22 @@ const cartItemCount = computed(() => {
                                     <!-- Mostrar la talla -->
                                     <div v-if="item.talla"
                                         class="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md">
+                                    <div v-if="item.talla"
+                                        class="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md">
                                         Talla: {{ item.talla.talla }}
                                     </div>
 
                                     <!-- Precio con descuento aplicado -->
                                     <div class="ml-auto">
+                                        <div v-if="
+                                            item.articulo.descuento &&
+                                            item.articulo.descuento > 0
+                                        " class="flex flex-col items-end">
+                                            <span class="line-through text-gray-500 dark:text-gray-400 text-xs">{{
+                                                item.articulo.precio
+                                            }}
+                                                €</span>
+                                            <p class="text-gray-900 dark:text-white font-semibold">
                                         <div v-if="
                                             item.articulo.descuento &&
                                             item.articulo.descuento > 0
@@ -323,6 +373,7 @@ const cartItemCount = computed(() => {
                                                 €
                                             </p>
                                         </div>
+                                        <p v-else class="text-gray-900 dark:text-white font-semibold">
                                         <p v-else class="text-gray-900 dark:text-white font-semibold">
                                             {{ item.articulo.precio }} €
                                         </p>
@@ -699,6 +750,9 @@ const cartItemCount = computed(() => {
     position: absolute;
     inset: -2px;
     border-radius: 50%;
+    background: linear-gradient(45deg,
+            rgba(168, 85, 247, 0.4),
+            rgba(79, 70, 229, 0.4));
     background: linear-gradient(45deg,
             rgba(168, 85, 247, 0.4),
             rgba(79, 70, 229, 0.4));
