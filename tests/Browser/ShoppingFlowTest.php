@@ -4,8 +4,6 @@ namespace Tests\Browser;
 
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
-use App\Models\Articulo;
-use App\Models\User;
 use Facebook\WebDriver\Chrome\ChromeOptions;
 use Facebook\WebDriver\Remote\WebDriverCapabilityType;
 use Throwable;

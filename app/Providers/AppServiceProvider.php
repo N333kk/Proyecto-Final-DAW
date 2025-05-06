@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Models\Cart;
+use App\Models\Categoria;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,5 +31,14 @@ class AppServiceProvider extends ServiceProvider
             }
             return 0;
         });
+
+        // Compartir las categorías con todas las páginas
+        Inertia::share([
+            'categorias' => function () {
+                return Categoria::with('subcategorias')
+                    ->whereNull('categoria_padre_id')
+                    ->get();
+            },
+        ]);
     }
 }

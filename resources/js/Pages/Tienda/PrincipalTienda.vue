@@ -134,7 +134,7 @@ onMounted(() => {
     <Head title="Novedades" />
     <div class="bg-gray-50 text-gray-800 dark:bg-black dark:text-white min-h-screen">
         <div class="flex flex-col items-center justify-center selection:bg-purple-500 selection:text-white dark:selection:bg-[#FF2D20]">
-                <Navbar />
+                <Navbar :categorias="categorias" />
 
                 <!-- Modal de selección de talla -->
                 <div v-if="showTallaModal && currentArticulo"

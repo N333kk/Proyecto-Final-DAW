@@ -1,10 +1,53 @@
 <script setup>
 import { Link, router } from '@inertiajs/vue3';
+import { ref, onMounted } from 'vue';
 
 // Lógica para cerrar sesión
 const logout = () => {
     router.post(route('logout'));
 };
+
+// Variables para el menú de categorías
+const showCategories = ref(false);
+const isMobile = ref(false);
+
+// Función para mostrar el menú
+const showMenu = () => {
+    showCategories.value = true;
+};
+
+// Función para ocultar el menú
+const hideMenu = () => {
+    showCategories.value = false;
+};
+
+// Función para alternar el menú (para dispositivos táctiles)
+const toggleMenu = () => {
+    showCategories.value = !showCategories.value;
+};
+
+onMounted(() => {
+    // Detectar si es dispositivo móvil al cargar
+    checkIfMobile();
+    // Agregar listener para cambios de tamaño de ventana
+    window.addEventListener('resize', checkIfMobile);
+});
+
+const checkIfMobile = () => {
+    isMobile.value = window.innerWidth < 768; // 768px es un breakpoint común para tabletas/móviles
+};
+
+// Props para recibir las categorías desde el componente padre
+const props = defineProps({
+    categorias: {
+        type: Array,
+        default: () => []
+    },
+    categoriaSeleccionada: {
+        type: String,
+        default: null
+    }
+});
 
 // El conteo de elementos del carrito viene ahora compartido desde Inertia en todas las páginas
 // No necesitamos recibirlo como prop, podemos accederlo directamente desde $page.props
@@ -17,8 +60,102 @@ const logout = () => {
             <div class="space-x-4">
                 <Link href="/" class="text-sm font-medium hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
                 Inicio</Link>
-                <Link href="/articulos" class="text-sm font-medium hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
-                Articulos</Link>
+                
+                <!-- Menú desplegable de categorías - Adaptado para móvil y escritorio -->
+                <div class="relative inline-block text-left">
+                    <!-- En móvil: toggle al hacer clic, en escritorio: hover -->
+                    <div v-if="isMobile">
+                        <button @click="toggleMenu"
+                                class="text-sm font-medium hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+                            Articulos
+                        </button>
+                    </div>
+                    <div v-else>
+                        <Link href="/articulos"
+                             @mouseenter="showMenu"
+                             class="text-sm font-medium hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+                            Articulos
+                        </Link>
+                    </div>
+
+                    <!-- Menú desplegable - visible al hover en escritorio o al hacer clic en móvil -->
+                    <div v-show="showCategories"
+                         @mouseenter="!isMobile && showMenu()"
+                         @mouseleave="!isMobile && hideMenu()"
+                         class="absolute z-10 left-0 mt-2 w-56 origin-top-left bg-white dark:bg-gray-800/95 rounded-md shadow-lg ring-1 ring-gray-200 dark:ring-black/50 ring-opacity-5 focus:outline-none">
+                        <!-- Botón para cerrar en dispositivos móviles -->
+                        <button v-if="isMobile"
+                                @click="hideMenu"
+                                class="absolute top-1 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white">
+                            ✕
+                        </button>
+
+                        <div class="py-1" role="none">
+                            <!-- Para móvil usamos la clase Link con el método @click -->
+                            <template v-if="isMobile">
+                                <div @click="hideMenu" class="text-gray-700 dark:text-white">
+                                    <Link href="/articulos"
+                                         :class="['block px-4 py-2 text-sm hover:bg-gray-100 hover:text-purple-700 dark:hover:bg-gray-700 dark:hover:text-white',
+                                                 !categoriaSeleccionada ? 'font-bold bg-purple-50 text-purple-700 dark:bg-gray-700 dark:text-white' : '']">
+                                        Todas las categorías
+                                    </Link>
+                                </div>
+                            </template>
+                            <template v-else>
+                                <Link href="/articulos"
+                                     :class="['text-gray-700 dark:text-white block px-4 py-2 text-sm hover:bg-gray-100 hover:text-purple-700 dark:hover:bg-gray-700 dark:hover:text-white',
+                                             !categoriaSeleccionada ? 'font-bold bg-purple-50 text-purple-700 dark:bg-gray-700 dark:text-white' : '']">
+                                    Todas las categorías
+                                </Link>
+                            </template>
+
+                            <div v-for="categoria in props.categorias" :key="categoria.id" class="text-gray-800 dark:text-white">
+                                <!-- Categoría padre -->
+                                <template v-if="isMobile">
+                                    <div @click="hideMenu">
+                                        <Link :href="`/articulos?categoria=${categoria.id}`"
+                                             :class="['block px-4 py-2 text-sm font-bold hover:bg-gray-100 hover:text-purple-700 dark:hover:bg-gray-700 dark:hover:text-white',
+                                                     categoriaSeleccionada == categoria.id ? 'bg-purple-50 text-purple-700 dark:bg-gray-700 dark:text-white' : '']">
+                                            {{ categoria.nombre }}
+                                        </Link>
+                                    </div>
+                                </template>
+                                <template v-else>
+                                    <Link :href="`/articulos?categoria=${categoria.id}`"
+                                         :class="['block px-4 py-2 text-sm font-bold hover:bg-gray-100 hover:text-purple-700 dark:hover:bg-gray-700 dark:hover:text-white',
+                                                 categoriaSeleccionada == categoria.id ? 'bg-purple-50 text-purple-700 dark:bg-gray-700 dark:text-white' : '']">
+                                        {{ categoria.nombre }}
+                                    </Link>
+                                </template>
+
+                                <!-- Subcategorías -->
+                                <div v-if="categoria.subcategorias && categoria.subcategorias.length > 0">
+                                    <template v-if="isMobile">
+                                        <div v-for="subcategoria in categoria.subcategorias"
+                                             :key="subcategoria.id"
+                                             @click="hideMenu">
+                                            <Link :href="`/articulos?categoria=${subcategoria.id}`"
+                                                 :class="['block px-8 py-1 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 hover:text-purple-700 dark:hover:bg-gray-700 dark:hover:text-white',
+                                                         categoriaSeleccionada == subcategoria.id ? 'bg-purple-50 text-purple-700 dark:bg-gray-700 dark:text-white font-semibold' : '']">
+                                                {{ subcategoria.nombre }}
+                                            </Link>
+                                        </div>
+                                    </template>
+                                    <template v-else>
+                                        <Link v-for="subcategoria in categoria.subcategorias"
+                                             :key="subcategoria.id"
+                                             :href="`/articulos?categoria=${subcategoria.id}`"
+                                             :class="['block px-8 py-1 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 hover:text-purple-700 dark:hover:bg-gray-700 dark:hover:text-white',
+                                                     categoriaSeleccionada == subcategoria.id ? 'bg-purple-50 text-purple-700 dark:bg-gray-700 dark:text-white font-semibold' : '']">
+                                            {{ subcategoria.nombre }}
+                                        </Link>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <Link v-if="$page.props.auth.user" href="/pedidos" class="text-sm font-medium hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
                 Pedidos</Link>
                 <Link v-if="$page.props.auth.user" href="/perfil" class="text-sm font-medium hover:text-purple-600 dark:hover:text-purple-400 transition-colors">{{

@@ -165,7 +165,7 @@ const calcularPrecioConDescuento = (precio, descuento) => {
 <Head title="Articulos" />
     <div class="bg-gray-50 text-gray-800 dark:bg-black dark:text-white min-h-screen">
         <div class="flex flex-col items-center justify-center selection:bg-purple-500 selection:text-white dark:selection:bg-[#FF2D20]">
-            <Navbar />
+            <Navbar :categorias="categorias" :categoriaSeleccionada="categoriaSeleccionada" />
 
             <!-- Modal de selección de talla -->
             <div v-if="showTallaModal && currentArticulo"
