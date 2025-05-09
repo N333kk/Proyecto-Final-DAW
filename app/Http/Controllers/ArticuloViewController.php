@@ -209,8 +209,7 @@ class ArticuloViewController extends Controller
             'nombre' => $validated['nombre'],
             'descripcion' => $validated['descripcion'],
             'descripcion_short' => $validated['descripcion_short'],
-            'precio' => $validated['precio'],
-            'categoria_id' => $validated['categoria_id'],
+            'precio' => $validated['precio']
         ]);
 
         if ($request->categoria_id) {
