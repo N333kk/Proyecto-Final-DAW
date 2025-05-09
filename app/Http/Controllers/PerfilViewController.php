@@ -21,7 +21,7 @@ class PerfilViewController extends Controller
             'categorias' => \App\Models\Categoria::with('subcategorias')->whereNull('categoria_padre_id')->get()
         ]);
     }
-    
+
     public function show()
     {
         $user = Auth::user();
