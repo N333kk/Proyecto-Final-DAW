@@ -86,7 +86,7 @@ class ArticuloViewController extends Controller
     {
         $validated = $request->validate([
             'nombre' => ['required', 'string'],
-            'imagen' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'imagen' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
             'categoria_id' => ['required', 'string'],
             'descripcion' => ['required', 'string'],
             'descripcion_short' => ['required', 'string'],
