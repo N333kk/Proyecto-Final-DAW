@@ -254,7 +254,24 @@ onMounted(() => {
                                     </div>
                                     <div class="p-4">
                                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ articulo.nombre }}</h3>
-                                        <p class="text-purple-600 dark:text-purple-400 font-bold mt-1">{{ articulo.precio.toFixed(2) }} €</p>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <!-- Con descuento -->
+                                            <template v-if="articulo.descuento > 0">
+                                                <p class="text-green-600 dark:text-green-400 font-bold">
+                                                    {{ (articulo.precio - (articulo.precio * articulo.descuento / 100)).toFixed(2) }} €
+                                                </p>
+                                                <p class="text-gray-500 dark:text-gray-400 line-through text-sm">
+                                                    {{ articulo.precio.toFixed(2) }} €
+                                                </p>
+                                                <span class="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 text-xs px-2 py-0.5 rounded-md ml-2">
+                                                    -{{ articulo.descuento }}%
+                                                </span>
+                                            </template>
+                                            <!-- Sin descuento -->
+                                            <template v-else>
+                                                <p class="text-purple-600 dark:text-purple-400 font-bold">{{ articulo.precio.toFixed(2) }} €</p>
+                                            </template>
+                                        </div>
                                         <div class="mt-4 flex justify-between">
                                             <Link :href="`/articulos/${articulo.id}`" class="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:underline transition-colors">
                                                 Ver detalles
