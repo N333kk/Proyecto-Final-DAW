@@ -11,6 +11,7 @@ const props = defineProps({
     users: Object,
     articulos: Object,
     pedidos: Object,
+    categorias: Array
 });
 
 // Referencia para almacenar el artículo que está siendo editado
@@ -67,7 +68,7 @@ const limitarTexto = (texto, longitud) => {
     <Head title="Admin Dashboard" />
     <div class="bg-gray-50 text-gray-800 dark:bg-black dark:text-white min-h-screen">
         <div class="flex flex-col selection:bg-purple-500 selection:text-white dark:selection:bg-[#FF2D20]">
-            <Navbar />
+            <Navbar :categorias="categorias" />
 
             <!-- Título del dashboard con estilo actualizado -->
             <div class="px-8 flex flex-row min-w-full border-b border-gray-300 dark:border-white/20 bg-gradient-to-r from-purple-50 to-transparent dark:from-purple-900/10">

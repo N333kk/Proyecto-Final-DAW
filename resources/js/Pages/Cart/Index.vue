@@ -13,6 +13,7 @@ import Navbar from "@/Components/Navbar.vue";
 
 const props = defineProps({
     cartItems: Array,
+    categorias: Array // Añadimos la propiedad categorias
 });
 
 const logout = () => {
@@ -210,7 +211,7 @@ const cartItemCount = computed(() => {
     <div class="bg-gray-50 text-gray-800 dark:bg-black dark:text-white min-h-screen">
         <div
             class="flex flex-col items-start justify-center selection:bg-purple-500 selection:text-white dark:selection:bg-[#FF2D20]">
-            <Navbar :cart-items-count="cartItemCount" />
+            <Navbar :cart-items-count="cartItemCount" :categorias="categorias" />
 
             <div
                 class="px-8 flex flex-row min-w-full border-b border-gray-300 dark:border-white/20 bg-gradient-to-r from-purple-100 to-transparent dark:from-purple-900/10">

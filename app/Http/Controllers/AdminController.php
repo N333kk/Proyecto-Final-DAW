@@ -48,7 +48,8 @@ class AdminController extends Controller
         return Inertia::render('Admin/Dashboard', [
             'articulos' => $articulosFormateados,
             'pedidos' => $pedidos,
-            'users' => $users
+            'users' => $users,
+            'categorias' => \App\Models\Categoria::with('subcategorias')->whereNull('categoria_padre_id')->get()
         ]);
     }
 }

@@ -17,15 +17,19 @@ class PerfilViewController extends Controller
         $userId = Auth::user();
         $user = User::find($userId->id)->load('articulos_favoritos.imagenes');
         return Inertia::render('Tienda/Perfil', [
-            'user' => $user
+            'user' => $user,
+            'categorias' => \App\Models\Categoria::with('subcategorias')->whereNull('categoria_padre_id')->get()
         ]);
     }
+
     public function show()
     {
         $user = Auth::user();
+        $user->load('articulos_favoritos.imagenes');
 
         return Inertia::render('Tienda/Perfil', [
-            'user' => $user
+            'user' => $user,
+            'categorias' => \App\Models\Categoria::with('subcategorias')->whereNull('categoria_padre_id')->get()
         ]);
     }
 

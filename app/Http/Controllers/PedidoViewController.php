@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pedido;
 use App\Models\User;
 use App\Models\CartItem;
+use App\Models\Categoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -28,7 +29,8 @@ class PedidoViewController extends Controller
 
         return Inertia::render('Pedidos/ListadoPedidos', [
             'pedidos' => $filteredPedidos,
-            'usuarios' => $usuariosConPedidos
+            'usuarios' => $usuariosConPedidos,
+            'categorias' => Categoria::with('subcategorias')->whereNull('categoria_padre_id')->get()
         ]);
     }
 
@@ -134,7 +136,8 @@ class PedidoViewController extends Controller
         $pedido->articulos_pedido = $articulosPedido;
 
         return Inertia::render('Pedidos/DetallePedido', [
-            'pedido' => $pedido
+            'pedido' => $pedido,
+            'categorias' => Categoria::with('subcategorias')->whereNull('categoria_padre_id')->get()
         ]);
     }
 
