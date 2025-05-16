@@ -144,7 +144,7 @@ const calcularTotal = (items) => {
                                     </td>
                                     <td class="py-4 px-4 text-sm text-gray-900 dark:text-gray-200 font-medium">
                                         <div v-if="item.talla" class="px-2 py-1 inline-block bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-medium rounded-md">
-                                            {{ item.talla.talla }}
+                                            {{ item.talla }}
                                         </div>
                                         <span v-else class="text-gray-500 dark:text-gray-400">No aplica</span>
                                     </td>
