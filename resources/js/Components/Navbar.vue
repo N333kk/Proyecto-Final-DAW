@@ -1,5 +1,6 @@
 <script setup>
 import { Link, router } from '@inertiajs/vue3';
+import Logo from '../../images/logo.png';
 import { ref, onMounted } from 'vue';
 
 // Lógica para cerrar sesión
@@ -57,10 +58,11 @@ const props = defineProps({
     <header class="min-w-full sticky top-0 z-50">
         <nav
             class="flex min-w-screen space-x-4 sm:justify-between justify-center p-6 bg-white/95 dark:bg-black/95 backdrop-blur-sm text-gray-800 dark:text-white/80 border-b border-gray-200 dark:border-white/20 shadow-lg">
-            <div class="space-x-4">
-                <Link href="/" class="text-sm font-medium hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
-                Inicio</Link>
-                
+            <div class="flex items-center space-x-4">
+                <Link href="/" class="flex items-center hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+                    <img :src="Logo" alt="Logo" class="h-14 w-auto" style="filter: invert(25%) sepia(64%) saturate(4215%) hue-rotate(269deg) brightness(91%) contrast(93%);">
+                </Link>
+
                 <!-- Menú desplegable de categorías - Adaptado para móvil y escritorio -->
                 <div class="relative inline-block text-left">
                     <!-- En móvil: toggle al hacer clic, en escritorio: hover -->
