@@ -157,6 +157,11 @@ const submitForm = () => {
                     <option value="6">Tablas</option>
                     <option value="7">Ejes</option>
                     <option value="8">Ruedas</option>
+                    <option value="9">Rodamientos</option>
+                    <option value="10">Accesorios</option>
+                    <option value="11">Gorras</option>
+                    <option value="12">Mochilas</option>
+                    <option value="13">Calcetines</option>
                     <!-- Falta añadir categorias, pero hay que cambiar esto por botones seleccionables generados dinamicamente. -->
                 </select>
                 <div v-if="form.errors.categoria_id" class="text-red-500 text-xs italic mt-4">
