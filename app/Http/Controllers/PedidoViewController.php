@@ -6,6 +6,7 @@ use App\Models\Pedido;
 use App\Models\User;
 use App\Models\CartItem;
 use App\Models\Categoria;
+use App\Models\Tallas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -111,7 +112,9 @@ class PedidoViewController extends Controller
 
         // Cargar el pedido con todas las relaciones necesarias
         $pedido->load(['user', 'articulos' => function ($query) {
-            $query->with('imagenes');
+            $query->with(['imagenes', 'tallas' => function ($query) {
+                $query->select('id', 'talla');
+            }]);
         }]);
 
         // Transformar la relación pivot para obtener los datos necesarios
@@ -119,7 +122,7 @@ class PedidoViewController extends Controller
             // Obtener la talla si existe
             $talla = null;
             if ($articulo->pivot->talla_id) {
-                $talla = \App\Models\Tallas::find($articulo->pivot->talla_id);
+                $talla = Tallas::find($articulo->pivot->talla_id);
             }
 
             return [
