@@ -13,7 +13,6 @@ class Tallas extends Model
     ];
     public function articulos()
     {
-        return $this->belongsToMany(Articulo::class, 'articulo_tallas', 'talla_id', 'articulo_id')
-            ->select('articulos.id', 'nombre', 'descripcion', 'descripcion_short', 'precio', 'descuento'); // Especificamos las columnas para evitar ambigüedad
+        return $this->belongsToMany(Articulo::class, 'articulo_tallas', 'talla_id', 'articulo_id');
     }
 }

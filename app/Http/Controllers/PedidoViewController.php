@@ -112,9 +112,7 @@ class PedidoViewController extends Controller
 
         // Cargar el pedido con todas las relaciones necesarias
         $pedido->load(['user', 'articulos' => function ($query) {
-            $query->with(['imagenes', 'tallas' => function ($query) {
-                $query->select('id', 'talla');
-            }]);
+            $query->with(['imagenes', 'tallas']);
         }]);
 
         // Transformar la relación pivot para obtener los datos necesarios
