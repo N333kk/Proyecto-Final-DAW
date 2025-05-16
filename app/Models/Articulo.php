@@ -31,7 +31,8 @@ class Articulo extends Model
     public function tallas()
     {
         return $this->belongsToMany(Tallas::class, 'articulo_tallas', 'articulo_id', 'talla_id')
-            ->withPivot('stock');
+            ->withPivot('stock')
+            ->select('tallas.id', 'talla'); // Especificamos las columnas de la tabla tallas para evitar ambigüedad
     }
 
     public function categoria()
